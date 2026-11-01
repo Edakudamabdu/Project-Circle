@@ -458,7 +458,7 @@ Transform:
   m_GameObject: {fileID: 193001000}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 8}
+  m_LocalPosition: {x: 0, y: -1.21, z: 8}
   m_LocalScale: {x: 34.6, y: 11.25, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2158,6 +2158,11 @@ MonoBehaviour:
   afterimageOpacity: 0.55
   afterimageInterval: 0.035
   afterimageLifetime: 0.22
+  jumpSound: {fileID: 0}
+  jumpSoundVolume: 1
+  dashSound: {fileID: 0}
+  dashSoundVolume: 1
+  loudSectionThreshold: 0.55
 --- !u!114 &532805593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2184,6 +2189,7 @@ MonoBehaviour:
   movementInfluence: 0.45
   idleSettleSpeed: 2.5
   idleSpeedThreshold: 0.12
+  wrapTransitionSpeed: 24
 --- !u!114 &532805594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2202,6 +2208,14 @@ MonoBehaviour:
   postRespawnGrace: 0.65
   initialSpawnPoint: {fileID: 900100002}
   fallbackSpawnPosition: {x: 0, y: -3}
+  showHealthHud: 1
+  hudOffset: {x: 28, y: 28}
+  hudSize: {x: 280, y: 30}
+  hudPadding: 4
+  hudBackground: {r: 0.025, g: 0.035, b: 0.06, a: 0.88}
+  healthColor: {r: 0.92, g: 0.33, b: 0.29, a: 1}
+  lowHealthColor: {r: 1, g: 0.16, b: 0.14, a: 1}
+  hudTextColor: {r: 1, g: 0.94, b: 0.82, a: 1}
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -2287,7 +2301,11 @@ MonoBehaviour:
         m_SelectedSource:
           rid: -2
         m_Provider2DCache:
-          rid: -2
+          rid: 6109681154706374659
+    - rid: 6109681154706374659
+      type: {class: 'Provider2DCache`1[[UnityEngine.Rendering.Universal.Light2DProvider, Unity.RenderPipelines.Universal.2D.Runtime]]', ns: UnityEngine.Rendering.Universal, asm: Unity.RenderPipelines.Universal.2D.Runtime}
+      data:
+        m_Cache: []
 --- !u!4 &619394802
 Transform:
   m_ObjectHideFlags: 0
@@ -2502,18 +2520,39 @@ PolygonCollider2D:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 700100001}
   m_Enabled: 1
+  serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
   m_IsTrigger: 0
   m_UsedByEffector: 0
-  m_UsedByComposite: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
     oldSize: {x: 1, y: 1}
     newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0
+    adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
@@ -2522,6 +2561,7 @@ PolygonCollider2D:
     - - {x: 0, y: 0.44}
       - {x: -0.46, y: -0.42}
       - {x: 0.46, y: -0.42}
+  m_UseDelaunayMesh: 1
 --- !u!212 &700100005
 SpriteRenderer:
   serializedVersion: 3
@@ -2566,6 +2606,7 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 5
@@ -2591,7 +2632,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b6d4d01c50744ab3b472a1a9aef0503c, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrianglePatrolEnemy
   chaseSpeed: 7
   jumpSpeed: 10
@@ -2683,6 +2724,8 @@ BoxCollider2D:
     oldSize: {x: 1, y: 1}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
   m_AutoTiling: 0
   m_Size: {x: 100, y: 1}
   m_EdgeRadius: 0
