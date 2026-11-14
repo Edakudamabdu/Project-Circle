@@ -28,6 +28,12 @@ namespace ProjectCircle.Enemies
         [Tooltip("Thickness of the outline drawn around the shape. 0 = no outline.")]
         [SerializeField, Min(0f)] private float outlineWidth = 0.06f;
 
+        [Tooltip("A corner that has snapped off, leaving a jagged edge (0 = top, 1 = bottom-left, 2 = bottom-right, -1 = none). Used for the Old Triangle.")]
+        [SerializeField, Range(-1, 2)] private int brokenCorner = -1;
+
+        [Tooltip("How much of the broken corner is missing, as a fraction of the centre-to-corner distance.")]
+        [SerializeField, Range(0.1f, 0.7f)] private float breakDepth = 0.35f;
+
         [Header("Colours")]
         [SerializeField] private Color fillColor = new Color(0.8f, 0.5f, 0.46f, 1f);
 
@@ -146,7 +152,10 @@ namespace ProjectCircle.Enemies
         /// Fills <paramref name="points"/> with the outline of a rounded equilateral triangle centred on the origin,
         /// pointing up, counter-clockwise. <paramref name="grow"/> pushes the outline outward (for outlines).
         /// </summary>
-        public static void BuildOutline(List<Vector2> points, float circumradius, float cornerRadius, int segmentsPerCorner, float grow = 0f)
+        /// <param name="brokenCorner">A corner drawn snapped off with a jagged edge instead of rounded (-1 = none).</param>
+        /// <param name="breakDepth">How much of the broken corner is missing, as a fraction of the circumradius.</param>
+        public static void BuildOutline(List<Vector2> points, float circumradius, float cornerRadius, int segmentsPerCorner,
+                                        float grow = 0f, int brokenCorner = -1, float breakDepth = 0.35f)
         {
             points.Clear();
             float r = Mathf.Min(cornerRadius, circumradius * 0.45f);
@@ -160,6 +169,12 @@ namespace ProjectCircle.Enemies
             for (int corner = 0; corner < 3; corner++)
             {
                 float cornerAngle = 90f + corner * 120f; // top, bottom-left, bottom-right
+                if (corner == brokenCorner)
+                {
+                    AddBrokenCorner(points, circumradius, cornerAngle, breakDepth, grow);
+                    continue;
+                }
+
                 Vector2 centre = Direction(cornerAngle) * arcCentreDistance;
 
                 // The arc turns through 120° (the outside angle of the corner).
@@ -168,6 +183,32 @@ namespace ProjectCircle.Enemies
                     float angle = cornerAngle - 60f + 120f * s / steps;
                     points.Add(centre + Direction(angle) * arcRadius);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Replaces a corner's rounded tip with a jagged break: the tip is cut off along both edges and the
+        /// cut zig-zags slightly, like a snapped edge. Points run counter-clockwise like the rest of the outline.
+        /// </summary>
+        private static void AddBrokenCorner(List<Vector2> points, float circumradius, float cornerAngle, float breakDepth, float grow)
+        {
+            Vector2 tip = Direction(cornerAngle) * circumradius;
+            Vector2 previousCorner = Direction(cornerAngle - 120f) * circumradius;
+            Vector2 nextCorner = Direction(cornerAngle + 120f) * circumradius;
+            float depth = breakDepth * circumradius;
+
+            Vector2 start = tip + (previousCorner - tip).normalized * depth; // where the break starts on the incoming edge
+            Vector2 end = tip + (nextCorner - tip).normalized * depth;       // and ends on the outgoing edge
+            Vector2 inward = -tip.normalized;
+
+            // A shallow zig-zag across the break (offsets are towards the centre, as fractions of the depth).
+            float[] along = { 0f, 0.28f, 0.5f, 0.74f, 1f };
+            float[] bite = { 0f, 0.22f, 0.04f, 0.18f, 0f };
+            for (int i = 0; i < along.Length; i++)
+            {
+                Vector2 p = Vector2.Lerp(start, end, along[i]) + inward * (bite[i] * depth);
+                if (grow > 0f) p += p.normalized * grow; // outline: push out by its width
+                points.Add(p);
             }
         }
 
@@ -198,11 +239,11 @@ namespace ProjectCircle.Enemies
             // Outline first (drawn underneath), then the fill on top. Both are fans around the centre.
             if (outlineWidth > 0f)
             {
-                BuildOutline(outline, circumradius, cornerRadius, segmentsPerCorner, outlineWidth);
+                BuildOutline(outline, circumradius, cornerRadius, segmentsPerCorner, outlineWidth, brokenCorner, breakDepth);
                 AddFan(outline, p => ToRenderSpace(Color.Lerp(outlineColor, glowColor, GlowWeight(p) * 0.9f)));
             }
 
-            BuildOutline(outline, circumradius, cornerRadius, segmentsPerCorner);
+            BuildOutline(outline, circumradius, cornerRadius, segmentsPerCorner, 0f, brokenCorner, breakDepth);
             float top = circumradius;
             float bottom = -Inradius;
             AddFan(outline, p =>

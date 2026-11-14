@@ -9,8 +9,8 @@ namespace ProjectCircle.Player
     /// <see cref="Heal"/>; UI listens to <see cref="HealthChanged"/>.
     ///
     /// After a hit the circle is briefly invulnerable and flickers. At zero health it disappears and,
-    /// after a short delay, respawns at its respawn point with full health. (Placeholder until Mirrors
-    /// become checkpoints: call <see cref="SetRespawnPoint"/> from a Mirror.)
+    /// after a short delay, respawns with full health: at the last Mirror rested at (loading that Mirror's
+    /// scene if it is elsewhere, see <see cref="Systems.CheckpointRecord"/>), or where the scene started it.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody2D))]
@@ -172,6 +172,16 @@ namespace ProjectCircle.Player
         private IEnumerator RespawnAfterDelay()
         {
             yield return new WaitForSeconds(respawnDelay);
+
+            // The last Mirror rested at is in another scene: go there. That scene's Mirror places the circle,
+            // and its fresh Player starts at full health.
+            string currentScene = gameObject.scene.name;
+            if (Systems.CheckpointRecord.HasCheckpoint && Systems.CheckpointRecord.SceneName != currentScene)
+            {
+                Systems.CheckpointRecord.RespawnPending = true;
+                Systems.ScreenFader.LoadScene(Systems.CheckpointRecord.SceneName, 0.35f);
+                yield break;
+            }
 
             body.position = respawnPoint;
             transform.position = respawnPoint;

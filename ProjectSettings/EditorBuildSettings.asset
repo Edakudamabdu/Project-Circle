@@ -8,6 +8,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Project/Scenes/Main.unity
     guid: 5735899795983ef42bbe64cea0a67106
+  - enabled: 1
+    path: Assets/_Project/Scenes/EnemyTest.unity
+    guid: ef4886cf65da9464891308736fcaf617
+  - enabled: 1
+    path: Assets/_Project/Scenes/StoryTest.unity
+    guid: b2242f4ffdc439d41addcf8045c1ae82
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

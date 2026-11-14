@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17272073cbcc03d4b82d101449fb470b, type: 3}
+  m_Name: Thoughts_StoryTestMirror_1
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Systems.Dialogue
+  speaker: Reflection
+  lines:
+  - No corners. No name. Just this round, quiet shape.
+  - They cast me out for being nothing.
+  - ...Then why does the old one look at me like I'm the only thing left that's real?

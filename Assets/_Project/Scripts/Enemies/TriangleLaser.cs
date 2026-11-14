@@ -88,6 +88,15 @@ namespace ProjectCircle.Enemies
         [Tooltip("How high it lifts off the floor while attacking.")]
         [SerializeField, Min(0f)] private float liftHeight = 0.35f;
 
+        [Tooltip("How far the triangle is kicked back (away from the beam) the moment it fires.")]
+        [SerializeField, Min(0f)] private float recoilDistance = 0.25f;
+
+        [Tooltip("How much it tips back from the kick, in degrees.")]
+        [SerializeField, Range(0f, 30f)] private float recoilTilt = 8f;
+
+        [Tooltip("Seconds to snap back into place after the kick.")]
+        [SerializeField, Min(0.01f)] private float recoilReturnTime = 0.28f;
+
         [Header("Look")]
         [SerializeField] private Color warningColor = new Color(1f, 0.32f, 0.22f, 0.85f);
         [SerializeField] private Color beamColor = new Color(1f, 0.5f, 0.25f, 0.55f);
@@ -316,10 +325,34 @@ namespace ProjectCircle.Enemies
             return Mathf.Atan2(to.y, to.x) * Mathf.Rad2Deg;
         }
 
-        /// <summary>Lifts the triangle by a fraction of the lift height and rotates it.</summary>
+        /// <summary>Lifts the triangle by a fraction of the lift height and rotates it, plus the firing recoil.</summary>
         private void ApplyPose(float lift, float rotation)
         {
-            enemy.SetAttackPose(new Vector2(0f, liftHeight * lift), rotation);
+            Vector2 offset = new Vector2(0f, liftHeight * lift);
+            float recoil = RecoilAmount();
+            if (recoil > 0f)
+            {
+                // Kicked straight back along the beam, tipping its firing corner up and away.
+                Vector2 beamDirection = Direction(aimAngle);
+                offset -= beamDirection * (recoilDistance * recoil);
+                float tipSide = beamDirection.x >= 0f ? 1f : -1f;
+                rotation += tipSide * recoilTilt * recoil;
+            }
+
+            enemy.SetAttackPose(offset, rotation);
+        }
+
+        /// <summary>0..1: a near-instant kick when the beam fires, easing back to 0 over the return time.</summary>
+        private float RecoilAmount()
+        {
+            if (phase != Phase.Fire) return 0f;
+
+            const float kickTime = 0.04f;
+            float t = PhaseTime;
+            if (t < kickTime) return t / kickTime;
+
+            float back = Mathf.Clamp01((t - kickTime) / recoilReturnTime);
+            return (1f - back) * (1f - back);
         }
 
         /// <summary>Works out where the beam starts (the firing vertex) and where it stops (first surface).</summary>

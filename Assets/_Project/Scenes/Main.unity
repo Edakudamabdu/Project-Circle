@@ -3432,6 +3432,7 @@ MonoBehaviour:
   jumpAction: {fileID: 335763634227698153, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   dashAction: {fileID: -3072405102054997809, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   attackAction: {fileID: 1903506563957944628, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  interactAction: {fileID: -5548793354506133487, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
 --- !u!58 &1585936353
 CircleCollider2D:
   m_ObjectHideFlags: 0

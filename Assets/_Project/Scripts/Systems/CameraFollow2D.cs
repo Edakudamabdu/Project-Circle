@@ -63,6 +63,15 @@ namespace ProjectCircle.Systems
         // Where the camera would be without shake. Shake is added on top, so it never drifts the follow.
         private Vector3 followPosition;
 
+        // Focus override (FocusOn / ClearFocus) and zoom.
+        private Camera cam;
+        private bool focusActive;
+        private Vector2 focusPoint;
+        private float focusSmoothTime = 0.35f;
+        private float defaultOrthographicSize;
+        private float zoomTarget;
+        private float zoomVelocity;
+
         // Screen shake (runs on real time, so it keeps going during a hit-stop freeze).
         private float shakeStrength;
         private float shakeDuration;
@@ -87,6 +96,28 @@ namespace ProjectCircle.Systems
             float t = (Time.unscaledTime - shakeStartTime) / Mathf.Max(shakeDuration, 0.01f);
             if (t >= 1f) return 0f;
             return shakeStrength * (1f - t) * (1f - t);
+        }
+
+        /// <summary>
+        /// Temporarily glides the camera onto a fixed point and zooms to <paramref name="orthographicSize"/>
+        /// (e.g. framing a Mirror). Call <see cref="ClearFocus"/> to return to following the target.
+        /// </summary>
+        public void FocusOn(Vector2 point, float orthographicSize, float smoothTime = 0.35f)
+        {
+            focusActive = true;
+            focusPoint = point;
+            focusSmoothTime = Mathf.Max(0.01f, smoothTime);
+            zoomTarget = orthographicSize;
+        }
+
+        /// <summary>Ends <see cref="FocusOn"/>: the camera glides back to the target and its normal zoom.</summary>
+        public void ClearFocus()
+        {
+            if (!focusActive) return;
+            focusActive = false;
+            zoomTarget = defaultOrthographicSize;
+            // Pick up the follow from where the camera is now, so it glides back instead of jumping.
+            if (target != null) focusY = target.position.y;
         }
 
         /// <summary>Sets a new target and snaps the camera to it.</summary>
@@ -120,6 +151,9 @@ namespace ProjectCircle.Systems
         private void Awake()
         {
             followPosition = transform.position;
+            cam = GetComponent<Camera>();
+            defaultOrthographicSize = cam != null ? cam.orthographicSize : 6f;
+            zoomTarget = defaultOrthographicSize;
 
             if (target != null && targetBody == null)
             {
@@ -138,8 +172,20 @@ namespace ProjectCircle.Systems
 
             float dt = Time.deltaTime;
 
+            // Zoom eases towards its target (normal size, or the size a focus asked for).
+            if (cam != null && Mathf.Abs(cam.orthographicSize - zoomTarget) > 0.001f)
+            {
+                cam.orthographicSize = Mathf.SmoothDamp(cam.orthographicSize, zoomTarget, ref zoomVelocity, focusSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
+            }
+
+            if (focusActive)
+            {
+                // Glide onto the focus point and hold there.
+                followPosition.x = Mathf.SmoothDamp(followPosition.x, focusPoint.x, ref velocityX, focusSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
+                followPosition.y = Mathf.SmoothDamp(followPosition.y, focusPoint.y, ref velocityY, focusSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
+            }
             // Follow (paused while time is frozen, e.g. during a hit-stop).
-            if (dt > 0f)
+            else if (dt > 0f)
             {
                 Vector2 targetPos = target.position;
                 Vector2 targetVelocity = targetBody != null ? targetBody.linearVelocity : Vector2.zero;
