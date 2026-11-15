@@ -28,6 +28,9 @@ namespace ProjectCircle.Player
         [Tooltip("Player/Interact — Button (talk to NPCs, rest at Mirrors).")]
         [SerializeField] private InputActionReference interactAction;
 
+        [Tooltip("Player/Parry — Button (the cape wraps around the circle to deflect projectiles and lasers).")]
+        [SerializeField] private InputActionReference parryAction;
+
         /// <summary>
         /// While true (during a conversation, at a Mirror...) the circle ignores gameplay input: no movement,
         /// jump, dash or attack. <see cref="ConfirmPressed"/> and <see cref="RawMove"/> still work so menus and
@@ -60,6 +63,9 @@ namespace ProjectCircle.Player
 
         /// <summary>Raised on the frame the interact button goes down (not while controls are locked).</summary>
         public event Action InteractPressed;
+
+        /// <summary>Raised on the frame the parry button goes down (not while controls are locked).</summary>
+        public event Action ParryPressed;
 
         /// <summary>
         /// Raised when Interact, Jump or Attack is pressed, even while controls are locked.
@@ -101,6 +107,12 @@ namespace ProjectCircle.Player
                 interactAction.action.Enable();
             }
 
+            if (parryAction != null)
+            {
+                parryAction.action.performed += HandleParryPerformed;
+                parryAction.action.Enable();
+            }
+
             moveAction?.action.Enable();
         }
 
@@ -128,6 +140,16 @@ namespace ProjectCircle.Player
             {
                 interactAction.action.performed -= HandleInteractPerformed;
             }
+
+            if (parryAction != null)
+            {
+                parryAction.action.performed -= HandleParryPerformed;
+            }
+        }
+
+        private void HandleParryPerformed(InputAction.CallbackContext _)
+        {
+            if (!ControlsLocked) ParryPressed?.Invoke();
         }
 
         private void HandleJumpPerformed(InputAction.CallbackContext _)

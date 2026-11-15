@@ -53,8 +53,6 @@ namespace ProjectCircle.Player
         private PlayerHealth health;
         private Color bodyColor = Color.white;
         private float hitTime = float.NegativeInfinity; // real time of the last hit
-        private Coroutine hitStopRoutine;
-        private float timeScaleBeforeStop = 1f;
 
         private void Awake()
         {
@@ -65,18 +63,7 @@ namespace ProjectCircle.Player
 
         private void OnEnable() => health.Hit += HandleHit;
 
-        private void OnDisable()
-        {
-            health.Hit -= HandleHit;
-
-            // Never leave the game frozen.
-            if (hitStopRoutine != null)
-            {
-                StopCoroutine(hitStopRoutine);
-                Time.timeScale = timeScaleBeforeStop;
-                hitStopRoutine = null;
-            }
-        }
+        private void OnDisable() => health.Hit -= HandleHit;
 
         private void LateUpdate()
         {
@@ -111,20 +98,8 @@ namespace ProjectCircle.Player
 
             if (cameraFollow != null) cameraFollow.Shake(shakeStrength * scale, shakeTime * scale);
 
-            if (hitStopTime > 0f)
-            {
-                if (hitStopRoutine != null) StopCoroutine(hitStopRoutine);
-                else timeScaleBeforeStop = Time.timeScale;
-                hitStopRoutine = StartCoroutine(HitStop(hitStopTime * scale));
-            }
-        }
-
-        private IEnumerator HitStop(float duration)
-        {
-            Time.timeScale = hitStopTimeScale;
-            yield return new WaitForSecondsRealtime(duration);
-            Time.timeScale = timeScaleBeforeStop;
-            hitStopRoutine = null;
+            // Shared with the attack's hit-stop, so overlapping freezes can't leave the game in slow motion.
+            Systems.HitStop.Freeze(hitStopTime * scale, hitStopTimeScale);
         }
     }
 }

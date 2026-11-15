@@ -86,6 +86,20 @@ namespace ProjectCircle.Player
         [SerializeField, Min(0f)] private float shakeStrength = 0.12f;
         [SerializeField, Min(0f)] private float shakeTime = 0.15f;
 
+        [Header("Parried (hitting a shield)")]
+        [Tooltip("Push-back speed when the blade glances off a shield.")]
+        [SerializeField, Min(0f)] private float parryRecoilSpeed = 9f;
+
+        [SerializeField, Min(0f)] private float parryRecoilTime = 0.14f;
+
+        [Tooltip("Real-time freeze on a parry (a sharp clash).")]
+        [SerializeField, Min(0f)] private float parryHitStopTime = 0.07f;
+
+        [SerializeField, Min(0f)] private float parryShakeStrength = 0.1f;
+
+        [Tooltip("Colour of the clash spark.")]
+        [SerializeField] private Color parryColor = new Color(0.75f, 0.95f, 1f, 1f);
+
         [Header("Slash Arc")]
         [SerializeField] private Color slashColor = new Color(0.92f, 0.95f, 1f, 0.6f);
 
@@ -104,11 +118,15 @@ namespace ProjectCircle.Player
         /// <summary>Raised when an attack hits something.</summary>
         public event Action<Collider2D> HitLanded;
 
+        /// <summary>Raised when an attack glances off a shield. Argument: where.</summary>
+        public event Action<Vector2> Parried;
+
         public bool IsAttacking => attacking;
 
         private PlayerMovement movement;
         private PlayerInputReader input;
         private PlayerHealth health;
+        private PlayerParry parry;
 
         private bool attacking;
         private float attackStartTime = float.NegativeInfinity;
@@ -127,6 +145,7 @@ namespace ProjectCircle.Player
         private readonly List<Color> arcColors = new List<Color>();
         private readonly List<int> arcTriangles = new List<int>();
         private float sparkTime = float.NegativeInfinity;
+        private Color hitSparkColor = Color.white;
 
         #region Unity lifecycle
 
@@ -135,7 +154,9 @@ namespace ProjectCircle.Player
             movement = GetComponent<PlayerMovement>();
             input = GetComponent<PlayerInputReader>();
             health = GetComponent<PlayerHealth>();
+            parry = GetComponent<PlayerParry>();
             if (cameraFollow == null) cameraFollow = FindAnyObjectByType<CameraFollow2D>();
+            if (hitSpark != null) hitSparkColor = hitSpark.Color;
 
             targetFilter = new ContactFilter2D { useLayerMask = true, layerMask = targetLayers, useTriggers = true };
 
@@ -174,6 +195,12 @@ namespace ProjectCircle.Player
                 bufferedUntil = Mathf.Max(bufferedUntil, Time.time + cape.PlatformBusyTimeLeft + 0.05f);
             }
 
+            // Same while it is wrapped for a parry: the attack comes out as soon as it unwraps.
+            if (Time.time <= bufferedUntil && parry != null && parry.IsBusy)
+            {
+                bufferedUntil = Mathf.Max(bufferedUntil, Time.time + 0.05f);
+            }
+
             if (Time.time <= bufferedUntil && CanAttack()) StartAttack();
         }
 
@@ -207,7 +234,14 @@ namespace ProjectCircle.Player
             if (attacking || Time.time < attackStartTime + cooldown) return false;
             if (movement.IsDashing || movement.IsKnockedBack) return false;
             if (cape != null && cape.IsFormingPlatform) return false; // the cape is busy being a platform
+            if (parry != null && parry.IsBusy) return false;          // ...or wrapped around the circle
             return health == null || !health.IsDead;
+        }
+
+        /// <summary>Called when a parry starts: a swing in progress gives the cape up (no hit, no cooldown).</summary>
+        public void InterruptForParry()
+        {
+            if (attacking) CancelAttack();
         }
 
         /// <summary>
@@ -220,6 +254,7 @@ namespace ProjectCircle.Player
         /// </summary>
         private bool CanCapeTakeAirJump()
         {
+            if (parry != null && parry.IsBusy) return false; // wrapped for a parry: the jump waits a moment
             if (!attacking) return true;
 
             bool pressedTogether = Time.time - attackStartTime <= simultaneousWindow && hitThisSwing.Count == 0;
@@ -299,6 +334,15 @@ namespace ProjectCircle.Player
                 if (enemyHealth == null || hitThisSwing.Contains(enemyHealth)) continue;
 
                 hitThisSwing.Add(enemyHealth);
+
+                // Shielded there? The blade glances off.
+                var guard = target.GetComponentInParent<IHitGuard>();
+                if (guard != null && guard.TryDeflect(closest, centre))
+                {
+                    OnParried(closest);
+                    continue;
+                }
+
                 if (enemyHealth.TakeHit(damage, centre)) OnHitLanded(target, closest);
                 else if (direction == AttackDirection.Down) TryPogo(); // still bounce off a target that shrugged the hit off
             }
@@ -321,13 +365,14 @@ namespace ProjectCircle.Player
 
             if (hitSpark != null)
             {
+                hitSpark.Color = hitSparkColor;
                 hitSpark.transform.position = new Vector3(point.x, point.y, hitSpark.transform.position.z);
                 hitSpark.Burst();
                 sparkTime = Time.unscaledTime;
             }
 
             if (cameraFollow != null) cameraFollow.Shake(shakeStrength, shakeTime);
-            if (hitStopTime > 0f && Time.timeScale >= 0.99f) StartCoroutine(HitStop());
+            HitStop.Freeze(hitStopTime);
 
             switch (direction)
             {
@@ -340,12 +385,39 @@ namespace ProjectCircle.Player
             }
         }
 
-        private IEnumerator HitStop()
+        /// <summary>
+        /// The blade struck a shield: a bright clash, a short freeze, and the circle is knocked back
+        /// (a down swing still bounces, so shields can be pogoed off).
+        /// </summary>
+        private void OnParried(Vector2 point)
         {
-            Time.timeScale = 0.05f;
-            yield return new WaitForSecondsRealtime(hitStopTime);
-            Time.timeScale = 1f;
+            Parried?.Invoke(point);
+
+            if (hitSpark != null)
+            {
+                hitSpark.Color = parryColor;
+                hitSpark.transform.position = new Vector3(point.x, point.y, hitSpark.transform.position.z);
+                hitSpark.Burst();
+                sparkTime = Time.unscaledTime;
+            }
+
+            if (cameraFollow != null) cameraFollow.Shake(parryShakeStrength, shakeTime);
+            HitStop.Freeze(parryHitStopTime);
+
+            switch (direction)
+            {
+                case AttackDirection.Down:
+                    TryPogo();
+                    break;
+                case AttackDirection.Side:
+                    movement.Recoil(new Vector2(-facing * parryRecoilSpeed, 0f), parryRecoilTime);
+                    break;
+                default: // Up: knocked back down a little
+                    movement.Recoil(new Vector2(-facing * parryRecoilSpeed * 0.5f, -2f), parryRecoilTime);
+                    break;
+            }
         }
+
 
         private Vector2 AimVector()
         {

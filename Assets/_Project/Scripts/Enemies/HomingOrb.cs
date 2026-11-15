@@ -85,8 +85,13 @@ namespace ProjectCircle.Enemies
         private const float FadeTime = 0.3f;  // fade at the end of its life
         private const float PopTime = 0.35f;  // burst ring after hitting something
 
+        private static readonly Color DeflectedColor = new Color(0.85f, 0.95f, 1f, 1f);
+        private const int EnemyLayers = 1 << 9;
+        private const float DeflectSpeedBoost = 1.35f;
+
         private Settings settings;
         private Transform target;
+        private bool deflected; // parried by the circle: now flies straight and hurts enemies instead
         private VertexGlow glow;
         private TrailRenderer trail;
         private Phase phase = Phase.Forming;
@@ -196,6 +201,8 @@ namespace ProjectCircle.Enemies
         /// <summary>Drift outward and slow down, then hunt with fading turn rate, then fly straight.</summary>
         private void Steer(float age, float dt)
         {
+            if (deflected) return; // flies straight at its deflected speed
+
             if (age < settings.driftTime)
             {
                 velocity *= Mathf.Exp(-4f * dt); // slow down so the volley hangs for a beat before hunting
@@ -241,12 +248,55 @@ namespace ProjectCircle.Enemies
                 return;
             }
 
+            if (deflected)
+            {
+                // Sent back by a parry: it now hurts enemies.
+                Collider2D enemy = Physics2D.OverlapCircle(position, settings.hitRadius * 1.6f, EnemyLayers);
+                if (enemy == null) return;
+                var enemyHealth = enemy.GetComponentInParent<Combat.EnemyHealth>();
+                if (enemyHealth != null) enemyHealth.TakeHit(Mathf.Max(1, settings.damage), position);
+                Pop();
+                return;
+            }
+
             Collider2D player = Physics2D.OverlapCircle(position, settings.hitRadius, settings.playerLayers);
             if (player == null) return;
+
+            // Parried: fly back the way it came.
+            var parry = player.GetComponentInParent<PlayerParry>();
+            if (parry != null && parry.TryDeflect(position))
+            {
+                Deflect(velocity.sqrMagnitude > 0.01f ? -velocity.normalized : Vector2.up);
+                return;
+            }
 
             // A dashing (invulnerable) player passes straight through and the orb flies on.
             var health = player.GetComponentInParent<PlayerHealth>();
             if (health != null && health.TakeDamage(settings.damage, position)) Pop();
+        }
+
+        /// <summary>
+        /// Sent back by the circle's parry: flies straight in <paramref name="direction"/>, faster, glowing pale,
+        /// and from now on hurts enemies instead of the circle. Its lifetime starts over.
+        /// </summary>
+        public void Deflect(Vector2 direction)
+        {
+            if (!IsDangerous && phase != Phase.Forming) return;
+
+            deflected = true;
+            phase = Phase.Coasting;
+            // Restart its life, already past the drifting and hunting stages.
+            releaseTime = Time.time - settings.driftTime - settings.homingTime;
+            float speed = Mathf.Max(velocity.magnitude, settings.maxSpeed) * DeflectSpeedBoost;
+            velocity = direction.normalized * speed;
+
+            glow.Color = DeflectedColor;
+            glow.Burst();
+            var gradient = new Gradient();
+            gradient.SetKeys(
+                new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(DeflectedColor, 1f) },
+                new[] { new GradientAlphaKey(0.8f, 0f), new GradientAlphaKey(0f, 1f) });
+            trail.colorGradient = gradient;
         }
 
         private void Pop()

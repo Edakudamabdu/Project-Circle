@@ -105,6 +105,12 @@ namespace ProjectCircle.Enemies
 
         [SerializeField, Min(0.005f)] private float warningWidth = 0.05f;
 
+        [Header("When Parried")]
+        [Tooltip("Damage the triangle takes when its beam is parried back into it.")]
+        [SerializeField, Min(0)] private int reflectDamage = 1;
+
+        [SerializeField] private Color reflectedColor = new Color(0.85f, 0.95f, 1f, 0.95f);
+
         /// <summary>Raised when the beam fires.</summary>
         public event Action Fired;
 
@@ -124,6 +130,9 @@ namespace ProjectCircle.Enemies
         private Vector2 beamStart;
         private Vector2 beamEnd;
         private bool damagedThisShot;
+        private bool reflected;       // parried by the circle this shot
+        private Vector2 reflectPoint;
+        private LineRenderer reflectedBeam;
 
         private float PhaseTime => Time.time - phaseStartTime;
 
@@ -133,6 +142,7 @@ namespace ProjectCircle.Enemies
         {
             enemy = GetComponent<TriangleEnemy>();
             health = GetComponent<EnemyHealth>();
+            CreateReflectedBeam();
             HideAll();
         }
 
@@ -227,6 +237,7 @@ namespace ProjectCircle.Enemies
             }
 
             damagedThisShot = false;
+            reflected = false;
             SetPhase(Phase.Rise);
         }
 
@@ -360,6 +371,14 @@ namespace ProjectCircle.Enemies
         {
             Vector2 direction = Direction(aimAngle);
             beamStart = VertexPosition();
+
+            // Parried: the beam stops at the circle's cape.
+            if (reflected)
+            {
+                beamEnd = reflectPoint;
+                return;
+            }
+
             RaycastHit2D hit = Physics2D.Raycast(beamStart, direction, range, blockingLayers);
             beamEnd = hit.collider != null ? hit.point : beamStart + direction * range;
         }
@@ -375,8 +394,46 @@ namespace ProjectCircle.Enemies
             RaycastHit2D hit = Physics2D.CircleCast(beamStart, beamWidth * 0.5f, direction / length, length, targetLayers);
             if (hit.collider == null) return;
 
+            // Parried: the beam reflects off the cape, straight back into this triangle.
+            var parry = hit.collider.GetComponentInParent<PlayerParry>();
+            if (parry != null && parry.TryDeflect(hit.point))
+            {
+                StartReflection(hit.point);
+                return;
+            }
+
             var health = hit.collider.GetComponentInParent<PlayerHealth>();
             if (health != null && health.TakeDamage(damage, beamStart)) damagedThisShot = true;
+        }
+
+        /// <summary>
+        /// The beam now ends at the parrying circle and a pale reflected beam runs back to the firing vertex.
+        /// The triangle takes a hit from its own laser (once per shot).
+        /// </summary>
+        private void StartReflection(Vector2 point)
+        {
+            reflected = true;
+            reflectPoint = point;
+            damagedThisShot = true; // the circle can't be hurt by the rest of this shot
+
+            if (this.health != null) this.health.TakeHit(reflectDamage, point);
+            if (muzzleGlow != null) muzzleGlow.Burst();
+        }
+
+        private void DrawReflection(float widthScale, float alpha)
+        {
+            if (reflectedBeam == null) return;
+            reflectedBeam.enabled = reflected && widthScale > 0.01f;
+            if (!reflectedBeam.enabled) return;
+
+            Color c = reflectedColor;
+            c.a *= alpha;
+            reflectedBeam.startColor = reflectedBeam.endColor = c;
+            // Slight flicker so it reads as a separate, returning beam on top of the original.
+            float flicker = 0.85f + 0.15f * Mathf.Sin(Time.time * 70f);
+            reflectedBeam.startWidth = reflectedBeam.endWidth = beamWidth * 0.7f * widthScale * flicker;
+            reflectedBeam.SetPosition(0, reflectPoint);
+            reflectedBeam.SetPosition(1, beamStart);
         }
 
         /// <summary>World position of the firing vertex, on the tip of its rounded corner.</summary>
@@ -436,6 +493,7 @@ namespace ProjectCircle.Enemies
             }
 
             ShowImpact(1.3f * widthScale * alpha);
+            DrawReflection(widthScale, alpha);
         }
 
         private void ShowImpact(float intensity)
@@ -467,6 +525,7 @@ namespace ProjectCircle.Enemies
 
         private void HideAll()
         {
+            if (reflectedBeam != null) reflectedBeam.enabled = false;
             if (warningLine != null) warningLine.enabled = false;
             if (beamGlow != null) beamGlow.enabled = false;
             if (beamCore != null) beamCore.enabled = false;
@@ -478,6 +537,24 @@ namespace ProjectCircle.Enemies
         {
             float radians = degrees * Mathf.Deg2Rad;
             return new Vector2(Mathf.Cos(radians), Mathf.Sin(radians));
+        }
+
+        /// <summary>A line for the parried (returning) beam, styled like the beam's core and drawn over it.</summary>
+        private void CreateReflectedBeam()
+        {
+            if (beamCore == null) return;
+            var go = new GameObject("Reflected Beam");
+            go.transform.SetParent(beamCore.transform.parent, false);
+            reflectedBeam = go.AddComponent<LineRenderer>();
+            reflectedBeam.sharedMaterial = beamCore.sharedMaterial;
+            reflectedBeam.sortingLayerID = beamCore.sortingLayerID;
+            reflectedBeam.sortingOrder = beamCore.sortingOrder + 1;
+            reflectedBeam.useWorldSpace = true;
+            reflectedBeam.positionCount = 2;
+            reflectedBeam.numCapVertices = 4;
+            reflectedBeam.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            reflectedBeam.receiveShadows = false;
+            reflectedBeam.enabled = false;
         }
 
         private static float Ease(float t)

@@ -343,10 +343,17 @@ namespace ProjectCircle.Enemies
             return true;
         }
 
+        /// <summary>
+        /// While true, an attack in progress drives the Rigidbody itself (e.g. a leaping slam), so the
+        /// triangle doesn't hold itself in place. Cleared by <see cref="EndAttack"/>.
+        /// </summary>
+        public bool AttackOwnsVelocity { get; set; }
+
         /// <summary>Releases the triangle after an attack and returns its pose to normal.</summary>
         public void EndAttack()
         {
             IsAttackLocked = false;
+            AttackOwnsVelocity = false;
             poseOverrideActive = false;
             restTimer = 0.2f;
         }
@@ -525,10 +532,10 @@ namespace ProjectCircle.Enemies
             // Falling (pushed off something, or placed in the air): wait until it lands.
             if (!IsGrounded) return;
 
-            // An attack is in progress: stand still and let it finish.
+            // An attack is in progress: stand still and let it finish (unless the attack is moving it itself).
             if (IsAttackLocked)
             {
-                body.linearVelocity = new Vector2(0f, body.linearVelocity.y);
+                if (!AttackOwnsVelocity) body.linearVelocity = new Vector2(0f, body.linearVelocity.y);
                 return;
             }
 
@@ -1367,6 +1374,19 @@ namespace ProjectCircle.Enemies
             }
 
             return new Vector2(FacingDirection, -0.35f).normalized;
+        }
+
+        /// <summary>
+        /// Replaces its colours from now on (e.g. a different palette when enraged). Calm colours show while
+        /// patrolling, angry ones while chasing; pass the same pair twice to show one look all the time.
+        /// </summary>
+        public void SetColours(Color newCalmTop, Color newCalmBottom, Color newAngryTop, Color newAngryBottom)
+        {
+            calmTop = newCalmTop;
+            calmBottom = newCalmBottom;
+            angryTop = newAngryTop;
+            angryBottom = newAngryBottom;
+            appliedAngerBlend = -1f; // reapply on the next frame
         }
 
         private void UpdateColour(float dt)

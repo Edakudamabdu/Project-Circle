@@ -1110,6 +1110,11 @@ MonoBehaviour:
   platformHoldTime: 0.1
   platformReturnTime: 0.12
   platformDip: 0.12
+  wrapRadius: 0.5
+  wrapThickness: 0.24
+  wrapFormTime: 0.04
+  wrapReleaseTime: 0.1
+  wrapSpin: 260
   groundLayers:
     serializedVersion: 2
     m_Bits: 8
@@ -1812,6 +1817,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Story Test Mirror
       objectReference: {fileID: 0}
+    - target: {fileID: 1354010043371029923, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 1731647981100096150, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4294962150
+      objectReference: {fileID: 0}
+    - target: {fileID: 1731647981100096150, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 1941727008570044007, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
       propertyPath: m_LocalPosition.x
       value: 6
@@ -1852,6 +1869,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2533966446922351478, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 2743514480767867100, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
       propertyPath: m_AdditionalShaderChannelsFlag
       value: 25
@@ -1859,6 +1880,18 @@ PrefabInstance:
     - target: {fileID: 4586672378602170495, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
       propertyPath: m_text
       value: Story Test Mirror
+      objectReference: {fileID: 0}
+    - target: {fileID: 4586672378602170495, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4288272882
+      objectReference: {fileID: 0}
+    - target: {fileID: 4586672378602170495, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 6763268297622525144, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
       objectReference: {fileID: 0}
     - target: {fileID: 7419270335312043101, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
       propertyPath: mirrorName
@@ -1876,9 +1909,21 @@ PrefabInstance:
       propertyPath: 'thoughts.Array.data[1]'
       value: 
       objectReference: {fileID: 11400000, guid: 0cc58d4e5f876d44ebf2296c97306fce, type: 2}
+    - target: {fileID: 7567527374156512513, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 7940427863567453090, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
       propertyPath: m_text
       value: Story Test Mirror
+      objectReference: {fileID: 0}
+    - target: {fileID: 7940427863567453090, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4288272882
+      objectReference: {fileID: 0}
+    - target: {fileID: 7940427863567453090, guid: c9fb9d7d3ab59384c9794f049ccbc843, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2846,6 +2891,7 @@ GameObject:
   - component: {fileID: 1585936357}
   - component: {fileID: 1585936359}
   - component: {fileID: 1585936360}
+  - component: {fileID: 1585936361}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -2915,6 +2961,7 @@ MonoBehaviour:
   dashAction: {fileID: -3072405102054997809, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   attackAction: {fileID: 1903506563957944628, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   interactAction: {fileID: -5548793354506133487, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  parryAction: {fileID: 8612818852247518081, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
 --- !u!58 &1585936353
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -3108,6 +3155,11 @@ MonoBehaviour:
   hitStopTime: 0.045
   shakeStrength: 0.12
   shakeTime: 0.15
+  parryRecoilSpeed: 9
+  parryRecoilTime: 0.14
+  parryHitStopTime: 0.07
+  parryShakeStrength: 0.1
+  parryColor: {r: 0.75, g: 0.95, b: 1, a: 1}
   slashColor: {r: 0.92, g: 0.95, b: 1, a: 0.6}
   slashInnerRadius: 0.55
   slashTrail: 120
@@ -3136,6 +3188,27 @@ MonoBehaviour:
   color: {r: 0.85, g: 0.92, b: 1, a: 0.75}
   sortingOrder: 7
   poolSize: 6
+--- !u!114 &1585936361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1585936349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad801c22fae0cc64088349bc4375fe40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Player.PlayerParry
+  cape: {fileID: 858917665}
+  flashMaterial: {fileID: 2100000, guid: aa50c9d316d0a4242af22d9fdd4077b4, type: 2}
+  activeWindow: 0.2
+  cooldown: 0.5
+  successGrace: 0.3
+  hitStopTime: 0.07
+  shakeStrength: 0.14
+  shakeTime: 0.18
+  flashColor: {r: 0.85, g: 0.95, b: 1, a: 1}
 --- !u!1 &1591869580
 GameObject:
   m_ObjectHideFlags: 0

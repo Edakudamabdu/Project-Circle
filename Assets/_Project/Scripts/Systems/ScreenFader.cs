@@ -69,6 +69,7 @@ namespace ProjectCircle.Systems
         {
             IsBusy = true;
             yield return Fade(0f, 1f, fadeTime);
+            HitStop.Release(); // never carry a frozen time scale into the next scene
 
             AsyncOperation load = SceneManager.LoadSceneAsync(sceneName);
             if (load == null)

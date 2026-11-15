@@ -200,6 +200,22 @@ namespace ProjectCircle.Player
         [Tooltip("How far the platform's middle dips when the circle springs off it.")]
         [SerializeField, Min(0f)] private float platformDip = 0.12f;
 
+        [Header("Wrap Form (parry)")]
+        [Tooltip("Radius of the circle's body the cape wraps around.")]
+        [SerializeField, Min(0.05f)] private float wrapRadius = 0.5f;
+
+        [Tooltip("Thickness of the wrapped cape.")]
+        [SerializeField, Min(0.01f)] private float wrapThickness = 0.24f;
+
+        [Tooltip("Seconds for the cape to whip around the circle.")]
+        [SerializeField, Min(0.001f)] private float wrapFormTime = 0.04f;
+
+        [Tooltip("Seconds for it to loosen back into cloth.")]
+        [SerializeField, Min(0.001f)] private float wrapReleaseTime = 0.1f;
+
+        [Tooltip("How fast the wrap turns while held (degrees per second).")]
+        [SerializeField] private float wrapSpin = 260f;
+
         [Header("Collision")]
         [Tooltip("Layers the cloth collides with (floors, walls, slopes).")]
         [SerializeField] private LayerMask groundLayers;
@@ -240,6 +256,11 @@ namespace ProjectCircle.Player
         private float swingFrontUntil = float.NegativeInfinity;
         private float bladeAmount;      // 0 = cloth, 1 = fully formed blade
         private float drawnBladeAmount = -1f; // blade amount the mesh colours were last written for
+
+        // --- Parry wrap
+        private bool wrapActive;
+        private float wrapStartTime;
+        private float wrapHoldTime;
 
         // --- Air-jump platform
         private bool platformActive;
@@ -407,6 +428,20 @@ namespace ProjectCircle.Player
             platformPoint = point;
         }
 
+        /// <summary>
+        /// The cape whips around the circle and wraps it for <paramref name="holdTime"/> seconds (the parry),
+        /// then loosens back into cloth. Purely visual.
+        /// </summary>
+        public void PlayWrap(float holdTime)
+        {
+            wrapActive = true;
+            wrapStartTime = Time.time;
+            wrapHoldTime = Mathf.Max(0f, holdTime);
+        }
+
+        /// <summary>True while the cape is wrapped (or still unwrapping) around the circle.</summary>
+        public bool IsWrapping => wrapActive;
+
         /// <summary>Stops a swing early (e.g. when an air jump takes the cape instead).</summary>
         public void CancelSwing()
         {
@@ -423,6 +458,7 @@ namespace ProjectCircle.Player
             edgeAngle = -90f;
             swinging = false;
             platformActive = false;
+            wrapActive = false;
             bladeAmount = 0f;
             streamFactor = 0f;
             lengthScale = idleLengthFactor;
@@ -508,6 +544,24 @@ namespace ProjectCircle.Player
             {
                 platformActive = false;
             }
+
+            if (wrapActive && Time.time >= wrapStartTime + wrapFormTime + wrapHoldTime + wrapReleaseTime)
+            {
+                wrapActive = false;
+            }
+        }
+
+        /// <summary>How far the cape is wrapped around the circle (0..1): a fast whip in, a hold, a quick release.</summary>
+        private float WrapAmount()
+        {
+            if (!wrapActive) return 0f;
+
+            float age = Time.time - wrapStartTime;
+            if (age < wrapFormTime) return Mathf.SmoothStep(0f, 1f, age / wrapFormTime);
+
+            float releaseAge = age - wrapFormTime - wrapHoldTime;
+            if (releaseAge <= 0f) return 1f;
+            return 1f - Mathf.SmoothStep(0f, 1f, releaseAge / wrapReleaseTime);
         }
 
         /// <summary>How far the cape is shape-shifted into the platform (0..1), with smooth fly-out and return.</summary>
@@ -527,7 +581,7 @@ namespace ProjectCircle.Player
         private void UpdateSortingOrder()
         {
             if (bodyRenderer == null) return;
-            bool inFront = Time.time < swingFrontUntil;
+            bool inFront = Time.time < swingFrontUntil || wrapActive;
             meshRenderer.sortingOrder = bodyRenderer.sortingOrder + (inFront ? 1 : sortingOffset);
         }
 
@@ -882,6 +936,8 @@ namespace ProjectCircle.Player
             if (bladeAmount > 0f) ApplyBladeForm(samples);
             float platform = PlatformAmount();
             if (platform > 0f) ApplyPlatformForm(samples, platform);
+            float wrap = WrapAmount();
+            if (wrap > 0f) ApplyWrapForm(samples, wrap);
 
             for (int v = 0; v < sheet.Length; v++)
             {
@@ -940,6 +996,32 @@ namespace ProjectCircle.Player
                     var target = new Vector2(x, platformPoint.y - sag - t * platformThickness);
                     int v = i * samples + s;
                     sheet[v] = Vector2.Lerp(sheet[v], target, amount);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Moves the sheet into a ring hugging the circle: the strands are spread evenly all the way round (the
+        /// first and last meet), each running from the outside of the ring in to the body. It turns slowly while
+        /// held, like cloth pulled tight and spun.
+        /// </summary>
+        private void ApplyWrapForm(int samples, float amount)
+        {
+            Vector2 centre = movement != null ? (Vector2)movement.transform.position : (Vector2)transform.position;
+            float spin = (Time.time - wrapStartTime) * wrapSpin;
+
+            for (int i = 0; i < strands; i++)
+            {
+                float around = strands > 1 ? (float)i / (strands - 1) : 0f;
+                float angle = (90f + spin + around * 360f) * Mathf.Deg2Rad;
+                var direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+
+                for (int s = 0; s < samples; s++)
+                {
+                    float t = (float)s / (samples - 1);
+                    float radius = wrapRadius + wrapThickness * (1f - t);
+                    int v = i * samples + s;
+                    sheet[v] = Vector2.Lerp(sheet[v], centre + direction * radius, amount);
                 }
             }
         }
