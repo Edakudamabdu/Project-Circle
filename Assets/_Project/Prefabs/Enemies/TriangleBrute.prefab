@@ -425,6 +425,7 @@ GameObject:
   - component: {fileID: 4250180931277182725}
   - component: {fileID: 4124112522656322124}
   - component: {fileID: 2177014335872619033}
+  - component: {fileID: 597294957365034083}
   m_Layer: 9
   m_Name: TriangleBrute
   m_TagString: Untagged
@@ -729,3 +730,42 @@ MonoBehaviour:
   groundLayers:
     serializedVersion: 2
     m_Bits: 8
+--- !u!114 &597294957365034083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9206003021318694745}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67c482623e6c3c8478f08e2570edc14a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Enemies.TriangleCounterBurst
+  hitsBeforeCounter: 3
+  comboWindow: 1.1
+  answerWindow: 0.6
+  windupTime: 0.3
+  recoverTime: 0.4
+  reach: 1.3
+  damage: 1
+  playerLayers:
+    serializedVersion: 2
+    m_Bits: 256
+  shakeStrength: 0.25
+  shockwave:
+    speed: 12
+    distance: 2.6
+    height: 1
+    damage: 1
+    topColor: {r: 0.86, g: 0.93, b: 1, a: 1}
+    bottomColor: {r: 0.55, g: 0.68, b: 0.92, a: 1}
+    outlineColor: {r: 0.14, g: 0.18, b: 0.32, a: 1}
+    playerLayers:
+      serializedVersion: 2
+      m_Bits: 256
+    groundLayers:
+      serializedVersion: 2
+      m_Bits: 8
+  flareColor: {r: 1, g: 0.92, b: 0.8, a: 1}
+  tremble: 0.06

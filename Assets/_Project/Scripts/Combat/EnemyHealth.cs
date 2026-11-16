@@ -29,6 +29,14 @@ namespace ProjectCircle.Combat
 
         private void Awake() => CurrentHealth = maxHealth;
 
+        /// <summary>Back to full health and alive (e.g. a boss fight restarting after the player died).</summary>
+        public void ResetHealth()
+        {
+            CurrentHealth = maxHealth;
+            IsDead = false;
+            lastHitTime = float.NegativeInfinity;
+        }
+
         /// <summary>
         /// Deals damage from a source position. Returns true if the hit landed (false if already dead or
         /// hit a moment ago).

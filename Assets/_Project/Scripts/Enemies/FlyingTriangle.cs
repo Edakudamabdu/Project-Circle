@@ -225,11 +225,21 @@ namespace ProjectCircle.Enemies
             Vector2 to = (Vector2)target.position - body.position;
             float distance = to.magnitude;
             float range = state == State.Chase ? loseRadius : detectionRadius;
-            if (distance <= range && Physics2D.Linecast(body.position, target.position, terrainLayers).collider == null)
+            bool clearLine = Physics2D.Linecast(body.position, target.position, terrainLayers).collider == null;
+            if ((AlwaysHunt || distance <= range) && clearLine)
             {
                 canSeeTarget = true;
                 lastSeenTime = Time.time;
                 lastSeenPosition = target.position;
+            }
+
+            // Summoned hunters always know where the circle is (they keep chasing), but only shoot with a clear line.
+            if (AlwaysHunt)
+            {
+                lastSeenTime = Time.time;
+                lastSeenPosition = target.position;
+                if (state != State.Chase) StartChase();
+                return;
             }
 
             switch (state)
@@ -246,6 +256,12 @@ namespace ProjectCircle.Enemies
                     break;
             }
         }
+
+        /// <summary>
+        /// If true it always knows where the circle is and never patrols: it goes straight for it.
+        /// Used for minions a boss summons.
+        /// </summary>
+        public bool AlwaysHunt { get; set; }
 
         private void StartChase()
         {

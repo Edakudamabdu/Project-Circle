@@ -60,6 +60,13 @@ namespace ProjectCircle.Systems
             if (input != null) input.InteractPressed -= HandleInteract;
         }
 
+        // Disabled (e.g. the character has fallen unconscious): hide the prompt. Interact is ignored too.
+        private void OnDisable()
+        {
+            promptAlpha = 0f;
+            SetPromptAlpha(0f);
+        }
+
         private void Update()
         {
             // Fade the prompt in while the circle is close and not already listening.
@@ -70,7 +77,7 @@ namespace ProjectCircle.Systems
 
         private void HandleInteract()
         {
-            if (box == null || box.IsOpen || !InRange()) return;
+            if (!isActiveAndEnabled || box == null || box.IsOpen || !InRange()) return;
 
             Dialogue next = NextDialogue();
             if (next == null) return;

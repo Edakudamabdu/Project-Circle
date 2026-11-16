@@ -58,6 +58,7 @@ namespace ProjectCircle.Enemies
         private bool sinking;
         private float sinkStartTime;
         private bool hasHit;
+        private float nextChipTime;
         private readonly Transform[] shards = new Transform[ShardCount];
         private readonly float[] shardSize = new float[ShardCount];
 
@@ -121,6 +122,18 @@ namespace ProjectCircle.Enemies
 
             transform.position += Vector3.right * (direction * step);
             travelled += step;
+
+            // Chips kicked up behind the wave.
+            if (Time.time >= nextChipTime)
+            {
+                nextChipTime = Time.time + 0.05f;
+                Systems.Fx.Burst(new Vector2(transform.position.x, floorY + 0.05f), new Systems.Fx.BurstSettings
+                {
+                    count = 2, colorA = settings.bottomColor, colorB = settings.topColor,
+                    speedMin = 2f, speedMax = 5f, sizeMin = 0.07f, sizeMax = 0.16f, lifeMin = 0.25f, lifeMax = 0.45f,
+                    direction = direction > 0 ? 120f : 60f, spread = 25f, gravity = 2f, drag = 1f, triangles = true, sortingOrder = 11,
+                });
+            }
             if (travelled >= settings.distance) StartSinking();
 
             LayoutShards(0f);

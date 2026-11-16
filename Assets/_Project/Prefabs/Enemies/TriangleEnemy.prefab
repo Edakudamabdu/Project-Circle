@@ -687,6 +687,8 @@ MonoBehaviour:
   cornerRadius: 0.13
   segmentsPerCorner: 6
   outlineWidth: 0.06
+  brokenCorner: -1
+  breakDepth: 0.35
   fillColor: {r: 0.8, g: 0.5, b: 0.46, a: 1}
   fillBottomColor: {r: 0.62, g: 0.36, b: 0.36, a: 1}
   outlineColor: {r: 0.16, g: 0.08, b: 0.1, a: 1}
@@ -1246,9 +1248,9 @@ MonoBehaviour:
   pounceChargeTime: 0.24
   armoredWhileAttacking: 1
   retaliates: 1
-  hitKnockbackSpeed: 2.2
-  hitKnockbackLift: 2
-  hitStunTime: 0.18
+  hitKnockbackSpeed: 7
+  hitKnockbackLift: 3
+  hitStunTime: 0.25
   hitFlashTime: 0.1
   anticipationTime: 0.07
   anticipationSquash: 0.1
@@ -1304,11 +1306,16 @@ MonoBehaviour:
   recoverTime: 0.25
   retaliationDelay: 0.3
   liftHeight: 0.35
+  recoilDistance: 0.25
+  recoilTilt: 8
+  recoilReturnTime: 0.28
   warningColor: {r: 1, g: 0.32, b: 0.22, a: 0.85}
   beamColor: {r: 1, g: 0.5, b: 0.25, a: 0.55}
   coreColor: {r: 1, g: 0.95, b: 0.82, a: 1}
   vertexGlowColor: {r: 1, g: 0.6, b: 0.35, a: 1}
   warningWidth: 0.05
+  reflectDamage: 1
+  reflectedColor: {r: 0.85, g: 0.95, b: 1, a: 0.95}
 --- !u!114 &1287763208888499280
 MonoBehaviour:
   m_ObjectHideFlags: 0

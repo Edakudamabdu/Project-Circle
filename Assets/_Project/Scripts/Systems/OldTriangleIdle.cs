@@ -49,9 +49,43 @@ namespace ProjectCircle.Systems
             if (corruptionGlow != null) corruptionGlow.Color = corruptionColor;
         }
 
+        /// <summary>
+        /// While true, the Shapeshifter is pulling at him: the violet glow and the shiver never stop
+        /// (the world-shake in the opening). Set false to calm back down.
+        /// </summary>
+        public bool Agitated { get; set; }
+
+        /// <summary>True once he has collapsed (unconscious). No breathing, no glow.</summary>
+        public bool Collapsed { get; private set; }
+
+        private float collapseStartTime;
+
+        /// <summary>
+        /// He spends his last strength and slumps over, unconscious. <paramref name="instant"/> skips the slump
+        /// (e.g. loading the scene after the opening has been played).
+        /// </summary>
+        public void Collapse(bool instant = false)
+        {
+            if (Collapsed) return;
+            Collapsed = true;
+            Agitated = false;
+            collapseStartTime = instant ? float.NegativeInfinity : Time.time;
+        }
+
         private void Update()
         {
             if (visual == null) return;
+
+            if (Collapsed)
+            {
+                // Slump over a second and a half, then lie still with the glow out.
+                float c = Mathf.SmoothStep(0f, 1f, (Time.time - collapseStartTime) / 1.5f);
+                visual.localScale = new Vector3(visualRestScale.x * (1f + 0.06f * c), visualRestScale.y * (1f - 0.12f * c), visualRestScale.z);
+                visual.localPosition = visualRestPosition + new Vector3(0f, -0.1f * c, 0f);
+                visual.localRotation = Quaternion.Euler(0f, 0f, Mathf.Lerp(lean, lean - 16f, c));
+                if (corruptionGlow != null) corruptionGlow.Intensity = Mathf.Lerp(0.6f, 0f, c);
+                return;
+            }
 
             // Breathing: a slow squash that keeps the base on the ground.
             float breath = Mathf.Sin(Time.time * breathsPerSecond * Mathf.PI * 2f) * breathSquash;
@@ -66,9 +100,11 @@ namespace ProjectCircle.Systems
 
             float f = (Time.time - flickerStartTime) / flickerTime;
             float flicker = f >= 0f && f < 1f ? Mathf.Sin(f * Mathf.PI) * (0.6f + 0.4f * Mathf.Sin(Time.time * 70f)) : 0f;
+            if (Agitated) flicker = Mathf.Max(flicker, 0.75f + 0.25f * Mathf.Sin(Time.time * 70f));
 
             if (corruptionGlow != null) corruptionGlow.Intensity = 0.15f + 0.9f * flicker;
-            Vector3 jitter = flicker > 0f ? (Vector3)(Random.insideUnitCircle * shiver * flicker) : Vector3.zero;
+            float shake = Agitated ? shiver * 2.5f : shiver;
+            Vector3 jitter = flicker > 0f ? (Vector3)(Random.insideUnitCircle * shake * flicker) : Vector3.zero;
             visual.localPosition = visualRestPosition + jitter;
             visual.localRotation = Quaternion.Euler(0f, 0f, lean + flicker * 2.5f * Mathf.Sin(Time.time * 50f));
         }

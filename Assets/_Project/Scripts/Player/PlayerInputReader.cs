@@ -31,6 +31,19 @@ namespace ProjectCircle.Player
         [Tooltip("Player/Parry — Button (the cape wraps around the circle to deflect projectiles and lasers).")]
         [SerializeField] private InputActionReference parryAction;
 
+        [Tooltip("Player/Heal — Button, held (Mend). Optional: if empty, the project-wide 'Player/Heal' action is used.")]
+        [SerializeField] private InputActionReference healAction;
+
+        private InputAction heal;
+
+        /// <summary>True while the heal (Mend) button is held, unless something other than <paramref name="self"/> has locked the controls.</summary>
+        public bool HealHeld(object self)
+        {
+            if (heal == null || !heal.IsPressed()) return false;
+            foreach (object owner in controlLocks) if (owner != self) return false;
+            return true;
+        }
+
         /// <summary>
         /// While true (during a conversation, at a Mirror...) the circle ignores gameplay input: no movement,
         /// jump, dash or attack. <see cref="ConfirmPressed"/> and <see cref="RawMove"/> still work so menus and
@@ -81,6 +94,9 @@ namespace ProjectCircle.Player
 
         private void OnEnable()
         {
+            heal = healAction != null ? healAction.action : InputSystem.actions?.FindAction("Player/Heal");
+            heal?.Enable();
+
             // "performed" fires on press for Button actions; "canceled" fires on release.
             if (jumpAction != null)
             {

@@ -101,6 +101,7 @@ namespace ProjectCircle.Player
         private Rigidbody2D body;
         private CircleCollider2D circle;
         private PlayerInputReader input;
+        private PlayerAbilities abilities; // optional: the dash and air jump stay locked until unlocked
 
         private ContactFilter2D groundFilter;
         private readonly List<RaycastHit2D> groundHits = new List<RaycastHit2D>(8);
@@ -129,6 +130,7 @@ namespace ProjectCircle.Player
             body = GetComponent<Rigidbody2D>();
             circle = GetComponent<CircleCollider2D>();
             input = GetComponent<PlayerInputReader>();
+            abilities = GetComponent<PlayerAbilities>();
 
             groundFilter = new ContactFilter2D
             {
@@ -208,7 +210,7 @@ namespace ProjectCircle.Player
                 {
                     Jump();
                 }
-                else if (airJumpsLeft > 0 && !IsGrounded)
+                else if (airJumpsLeft > 0 && !IsGrounded && HasAbility(PlayerAbility.AirJump))
                 {
                     if (AirJumpGate == null || AirJumpGate()) AirJump();
                     else jumpBufferTimer = Mathf.Max(jumpBufferTimer, dt * 1.5f); // cape busy: hold the jump until it's free
@@ -567,7 +569,9 @@ namespace ProjectCircle.Player
 
         #region Dash
 
-        private bool CanDash() => dashCooldownTimer <= 0f && (IsGrounded || canAirDash);
+        private bool CanDash() => dashCooldownTimer <= 0f && (IsGrounded || canAirDash) && HasAbility(PlayerAbility.Dash);
+
+        private bool HasAbility(PlayerAbility ability) => abilities == null || abilities.Has(ability);
 
         private void StartDash()
         {

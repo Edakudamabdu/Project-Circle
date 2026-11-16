@@ -110,6 +110,42 @@ namespace ProjectCircle.Systems
             zoomTarget = orthographicSize;
         }
 
+        /// <summary>Like <see cref="FocusOn"/>, but a hard cut: the camera jumps there and zooms instantly.</summary>
+        public void CutTo(Vector2 point, float orthographicSize)
+        {
+            FocusOn(point, orthographicSize);
+            followPosition = new Vector3(point.x, point.y, transform.position.z);
+            velocityX = velocityY = zoomVelocity = 0f;
+            zoomSize = orthographicSize;
+            if (cam != null) cam.orthographicSize = orthographicSize;
+            transform.position = followPosition;
+        }
+
+        /// <summary>
+        /// A quick punch-in: the view tightens by <paramref name="amount"/> (0.08 = 8%) and eases back over
+        /// <paramref name="duration"/> seconds of real time. For big moments: a parry, a phase change.
+        /// </summary>
+        public void Punch(float amount = 0.08f, float duration = 0.3f)
+        {
+            punchAmount = Mathf.Max(punchAmount * PunchProgressLeft(), amount);
+            punchDuration = Mathf.Max(0.01f, duration);
+            punchStartTime = Time.unscaledTime;
+        }
+
+        private float punchAmount;
+        private float punchDuration = 0.3f;
+        private float punchStartTime = float.NegativeInfinity;
+        private float zoomSize;
+
+        private float PunchProgressLeft() => 1f - Mathf.Clamp01((Time.unscaledTime - punchStartTime) / punchDuration);
+
+        /// <summary>1 normally; dips below 1 (zoomed in) right after a punch, then eases back.</summary>
+        private float PunchFactor()
+        {
+            float left = PunchProgressLeft();
+            return 1f - punchAmount * left * left;
+        }
+
         /// <summary>Ends <see cref="FocusOn"/>: the camera glides back to the target and its normal zoom.</summary>
         public void ClearFocus()
         {
@@ -153,7 +189,7 @@ namespace ProjectCircle.Systems
             followPosition = transform.position;
             cam = GetComponent<Camera>();
             defaultOrthographicSize = cam != null ? cam.orthographicSize : 6f;
-            zoomTarget = defaultOrthographicSize;
+            zoomTarget = zoomSize = defaultOrthographicSize;
 
             if (target != null && targetBody == null)
             {
@@ -172,11 +208,12 @@ namespace ProjectCircle.Systems
 
             float dt = Time.deltaTime;
 
-            // Zoom eases towards its target (normal size, or the size a focus asked for).
-            if (cam != null && Mathf.Abs(cam.orthographicSize - zoomTarget) > 0.001f)
+            // Zoom eases towards its target (normal size, or the size a focus asked for); a punch-in rides on top.
+            if (Mathf.Abs(zoomSize - zoomTarget) > 0.001f)
             {
-                cam.orthographicSize = Mathf.SmoothDamp(cam.orthographicSize, zoomTarget, ref zoomVelocity, focusSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
+                zoomSize = Mathf.SmoothDamp(zoomSize, zoomTarget, ref zoomVelocity, focusSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
             }
+            if (cam != null) cam.orthographicSize = zoomSize * PunchFactor();
 
             if (focusActive)
             {

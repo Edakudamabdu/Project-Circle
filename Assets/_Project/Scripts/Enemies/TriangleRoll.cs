@@ -84,6 +84,7 @@ namespace ProjectCircle.Enemies
         private float settleFromAngle;
         private float settleToAngle;
         private bool pendingEnrage;
+        private float nextSteamTime;
 
         private float PhaseTime => Time.time - phaseStartTime;
         private float Circumradius => enemy.Shape != null ? enemy.Shape.Circumradius : 0.8f;
@@ -124,6 +125,20 @@ namespace ProjectCircle.Enemies
         {
             if (pendingEnrage) TryEnrage();
             if (!IsEnraged) return;
+
+            // Fuming: hot puffs rise off its body while enraged.
+            if (Time.time >= nextSteamTime && enemy.Shape != null)
+            {
+                nextSteamTime = Time.time + Random.Range(0.12f, 0.3f);
+                Vector2 c = enemy.Shape.transform.position;
+                Vector2 at = c + Random.insideUnitCircle * enemy.Shape.Circumradius * 0.5f;
+                Systems.Fx.Burst(at, new Systems.Fx.BurstSettings
+                {
+                    count = 2, colorA = new Color(1f, 0.7f, 0.7f, 0.5f), colorB = new Color(0.9f, 0.4f, 0.45f, 0.4f),
+                    speedMin = 0.8f, speedMax = 2f, sizeMin = 0.12f, sizeMax = 0.28f, lifeMin = 0.4f, lifeMax = 0.8f,
+                    direction = 90f, spread = 25f, gravity = -0.15f, drag = 1.5f, sortingOrder = 7,
+                });
+            }
 
             switch (phase)
             {

@@ -127,6 +127,7 @@ namespace ProjectCircle.Player
         private PlayerInputReader input;
         private PlayerHealth health;
         private PlayerParry parry;
+        private PlayerAbilities abilities;
 
         private bool attacking;
         private float attackStartTime = float.NegativeInfinity;
@@ -155,6 +156,7 @@ namespace ProjectCircle.Player
             input = GetComponent<PlayerInputReader>();
             health = GetComponent<PlayerHealth>();
             parry = GetComponent<PlayerParry>();
+            abilities = GetComponent<PlayerAbilities>();
             if (cameraFollow == null) cameraFollow = FindAnyObjectByType<CameraFollow2D>();
             if (hitSpark != null) hitSparkColor = hitSpark.Color;
 
@@ -231,6 +233,7 @@ namespace ProjectCircle.Player
 
         private bool CanAttack()
         {
+            if (abilities != null && !abilities.Has(PlayerAbility.Attack)) return false; // no cape yet
             if (attacking || Time.time < attackStartTime + cooldown) return false;
             if (movement.IsDashing || movement.IsKnockedBack) return false;
             if (cape != null && cape.IsFormingPlatform) return false; // the cape is busy being a platform

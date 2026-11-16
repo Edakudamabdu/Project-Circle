@@ -88,6 +88,7 @@ namespace ProjectCircle.Enemies
         private static readonly Color DeflectedColor = new Color(0.85f, 0.95f, 1f, 1f);
         private const int EnemyLayers = 1 << 9;
         private const float DeflectSpeedBoost = 1.35f;
+        private const float DeflectedLifetime = 3f; // seconds a parried orb flies before fading
 
         private Settings settings;
         private Transform target;
@@ -102,6 +103,15 @@ namespace ProjectCircle.Enemies
 
         /// <summary>True once released and still able to hurt.</summary>
         public bool IsDangerous => phase == Phase.Drifting || phase == Phase.Homing || phase == Phase.Coasting;
+
+        /// <summary>True once parried by the circle (it now hurts enemies instead).</summary>
+        public bool IsDeflected => deflected;
+
+        /// <summary>
+        /// Optional: once parried, the orb homes in on this (e.g. the boss that fired it) instead of flying
+        /// straight back. Leave null for the normal straight return.
+        /// </summary>
+        public Transform ReturnTo { get; set; }
 
         /// <summary>Creates an orb in its forming state at <paramref name="position"/>.</summary>
         public static HomingOrb Spawn(Vector2 position, Settings settings, Material material, Transform target)
@@ -201,7 +211,18 @@ namespace ProjectCircle.Enemies
         /// <summary>Drift outward and slow down, then hunt with fading turn rate, then fly straight.</summary>
         private void Steer(float age, float dt)
         {
-            if (deflected) return; // flies straight at its deflected speed
+            if (deflected)
+            {
+                // Sent back by a parry. Flies straight, unless it has an owner to return to: then it turns
+                // hard towards that owner, so a parry always pays off.
+                if (ReturnTo != null)
+                {
+                    Vector2 toOwner = (Vector2)ReturnTo.position - (Vector2)transform.position;
+                    float turn = Vector2.SignedAngle(velocity, toOwner);
+                    velocity = Rotate(velocity, Mathf.Clamp(turn, -900f * dt, 900f * dt));
+                }
+                return;
+            }
 
             if (age < settings.driftTime)
             {
@@ -285,8 +306,10 @@ namespace ProjectCircle.Enemies
 
             deflected = true;
             phase = Phase.Coasting;
-            // Restart its life, already past the drifting and hunting stages.
+            // Restart its life, already past the drifting and hunting stages, with a fresh few seconds to fly back
+            // (long-homing orbs would otherwise fade out on the way).
             releaseTime = Time.time - settings.driftTime - settings.homingTime;
+            settings.lifetime = settings.driftTime + settings.homingTime + DeflectedLifetime;
             float speed = Mathf.Max(velocity.magnitude, settings.maxSpeed) * DeflectSpeedBoost;
             velocity = direction.normalized * speed;
 

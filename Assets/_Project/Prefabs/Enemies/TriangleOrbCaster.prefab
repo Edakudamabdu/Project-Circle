@@ -403,6 +403,8 @@ MonoBehaviour:
   cornerRadius: 0.13
   segmentsPerCorner: 6
   outlineWidth: 0.06
+  brokenCorner: -1
+  breakDepth: 0.35
   fillColor: {r: 0.62, g: 0.52, b: 0.86, a: 1}
   fillBottomColor: {r: 0.44, g: 0.36, b: 0.66, a: 1}
   outlineColor: {r: 0.12, g: 0.07, b: 0.2, a: 1}
@@ -599,9 +601,9 @@ MonoBehaviour:
   pounceChargeTime: 0.24
   armoredWhileAttacking: 1
   retaliates: 1
-  hitKnockbackSpeed: 2.2
-  hitKnockbackLift: 2
-  hitStunTime: 0.18
+  hitKnockbackSpeed: 7
+  hitKnockbackLift: 3
+  hitStunTime: 0.25
   hitFlashTime: 0.1
   anticipationTime: 0.07
   anticipationSquash: 0.1

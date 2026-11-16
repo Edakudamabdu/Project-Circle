@@ -51,6 +51,12 @@ namespace ProjectCircle.Enemies
 
         [SerializeField, Min(0f)] private float crouchDepth = 0.25f;
 
+        [Tooltip("Gravity multiplier on the way up (higher = a quicker, snappier rise).")]
+        [SerializeField, Min(0.5f)] private float riseGravity = 1.6f;
+
+        [Tooltip("Gravity multiplier on the way down (higher = it slams down hard and fast).")]
+        [SerializeField, Min(0.5f)] private float fallGravity = 3.5f;
+
         [Tooltip("Layers it stands on and that block the leap.")]
         [SerializeField] private LayerMask groundLayers = 1 << 3;
 
@@ -79,9 +85,10 @@ namespace ProjectCircle.Enemies
         private bool wasInRange;
         private int leapDirection;
         private float launchSpeedX;
+        private float baseGravityScale;
 
         private float PhaseTime => Time.time - phaseStartTime;
-        private float Gravity => Mathf.Abs(Physics2D.gravity.y) * body.gravityScale;
+        private float Gravity => Mathf.Abs(Physics2D.gravity.y) * baseGravityScale;
         private float Circumradius => enemy.Shape != null ? enemy.Shape.Circumradius : 0.8f;
         private float Inradius => Circumradius * 0.5f;
         private float SideLength => Circumradius * 1.7320508f;
@@ -93,6 +100,7 @@ namespace ProjectCircle.Enemies
         {
             enemy = GetComponent<TriangleEnemy>();
             body = GetComponent<Rigidbody2D>();
+            baseGravityScale = body.gravityScale;
         }
 
         private void Start() => cameraFollow = FindAnyObjectByType<CameraFollow2D>();
@@ -172,12 +180,15 @@ namespace ProjectCircle.Enemies
                                                      leapHeight + Circumradius, groundLayers);
             if (ceiling.collider != null) height = Mathf.Max(0.8f, ceiling.distance - Circumradius - 0.2f);
 
-            float g = Gravity;
-            float vy = Mathf.Sqrt(2f * g * height);
-            float flightTime = 2f * vy / g;
+            // A quick rise, then it slams down under much heavier gravity: a snap, not a float.
+            float gUp = Gravity * riseGravity;
+            float gDown = Gravity * fallGravity;
+            float vy = Mathf.Sqrt(2f * gUp * height);
+            float flightTime = vy / gUp + Mathf.Sqrt(2f * height / gDown);
             float vx = (landX - x) / flightTime;
 
             enemy.AttackOwnsVelocity = true;
+            body.gravityScale = baseGravityScale * riseGravity;
             body.linearVelocity = new Vector2(vx, vy);
             launchSpeedX = vx;
             if (enemy.Shape != null) enemy.Shape.SetCornerGlow(0, 1f, chargeColor);
@@ -188,6 +199,9 @@ namespace ProjectCircle.Enemies
         {
             // Keep the sideways speed for the whole flight (it's ballistic; this also rides out any bump).
             body.linearVelocity = new Vector2(launchSpeedX, body.linearVelocity.y);
+
+            // Past the top of the arc: drop hard.
+            if (body.linearVelocity.y <= 0f) body.gravityScale = baseGravityScale * fallGravity;
 
             // Tip forward into the fall; the charge fades as it flies.
             float rising = Mathf.Clamp01(body.linearVelocity.y / 6f);
@@ -200,6 +214,7 @@ namespace ProjectCircle.Enemies
         private void Impact()
         {
             launchSpeedX = 0f;
+            body.gravityScale = baseGravityScale;
             enemy.AttackOwnsVelocity = false;
             body.linearVelocity = new Vector2(0f, body.linearVelocity.y);
             if (enemy.Shape != null) enemy.Shape.SetCornerGlow(-1, 0f, chargeColor);
@@ -214,6 +229,9 @@ namespace ProjectCircle.Enemies
                 var health = player.GetComponentInParent<PlayerHealth>();
                 if (health != null) health.TakeDamage(impactDamage, crushCentre);
             }
+
+            Systems.Fx.Dust(new Vector2(body.position.x, floorY), SideLength, 1.2f);
+            Systems.Fx.Crack(new Vector2(body.position.x, floorY), SideLength, new Color(0.85f, 0.92f, 1f, 1f));
 
             // Shockwaves from both ends of its base.
             Material material = enemy.Shape != null ? enemy.Shape.GetComponent<MeshRenderer>().sharedMaterial : null;
@@ -247,10 +265,27 @@ namespace ProjectCircle.Enemies
             enemy.EndAttack();
         }
 
+        /// <summary>True during the flattened pause after landing (the opening to hit it).</summary>
+        public bool IsRecovering => phase == Phase.Recover;
+
+        /// <summary>
+        /// Cuts the recovery short so another move can start at once (e.g. <see cref="TriangleCounterBurst"/>
+        /// answering a string of hits). Only works during the recovery; returns true if it did.
+        /// </summary>
+        public bool InterruptRecovery()
+        {
+            if (phase != Phase.Recover) return false;
+            phase = Phase.Ready;
+            nextSlamTime = Time.time + cooldown;
+            enemy.EndAttack();
+            return true;
+        }
+
         private void Abort()
         {
             if (enemy != null && enemy.Shape != null) enemy.Shape.SetCornerGlow(-1, 0f, chargeColor);
             bool wasLocked = enemy != null && enemy.IsAttackLocked;
+            if (body != null) body.gravityScale = baseGravityScale;
             phase = Phase.Ready;
             nextSlamTime = Time.time + cooldown * 0.5f;
             if (wasLocked) enemy.EndAttack();

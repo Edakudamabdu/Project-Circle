@@ -71,6 +71,8 @@ namespace ProjectCircle.Enemies
 
         public Color FillColor => fillColor;
 
+        public Color FillBottomColor => fillBottomColor;
+
         #region Unity lifecycle
 
         private void OnEnable() => Rebuild();

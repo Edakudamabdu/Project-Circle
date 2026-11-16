@@ -1128,6 +1128,90 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!1001 &320615749
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1468477385452694438, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 71
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468477385452694438, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468477385452694438, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468477385452694438, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468477385452694438, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468477385452694438, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468477385452694438, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468477385452694438, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468477385452694438, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468477385452694438, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5554117204999075124, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: doorId
+      value: Boss
+      objectReference: {fileID: 0}
+    - target: {fileID: 5554117204999075124, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: targetScene
+      value: BossArena
+      objectReference: {fileID: 0}
+    - target: {fileID: 5554117204999075124, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: targetDoorId
+      value: Arena
+      objectReference: {fileID: 0}
+    - target: {fileID: 5554117204999075124, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: arrivalOffset.x
+      value: -1.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5554117204999075124, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: arrivalOffset.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6437791611980410406, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: m_text
+      value: Boss Arena
+      objectReference: {fileID: 0}
+    - target: {fileID: 8034250057245064984, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      propertyPath: m_Name
+      value: Door To Boss Arena
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1184781750299147541, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+  m_SourcePrefab: {fileID: 100100000, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
 --- !u!1 &692422218
 GameObject:
   m_ObjectHideFlags: 0
@@ -1419,7 +1503,7 @@ MonoBehaviour:
   idleSpread: 84
   streamSpread: 13
   spreadFalloff: 1.5
-  capeColor: {r: 0.45, g: 0.48, b: 0.58, a: 1}
+  capeColor: {r: 0.72, g: 0.14, b: 0.19, a: 1}
   pleatShade: 0.16
   hemShade: 0.22
   streamSpeed: 3
@@ -3946,6 +4030,9 @@ GameObject:
   - component: {fileID: 1585936359}
   - component: {fileID: 1585936360}
   - component: {fileID: 1585936361}
+  - component: {fileID: 1585936362}
+  - component: {fileID: 1585936363}
+  - component: {fileID: 1585936364}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -4016,6 +4103,7 @@ MonoBehaviour:
   attackAction: {fileID: 1903506563957944628, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   interactAction: {fileID: -5548793354506133487, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   parryAction: {fileID: 8612818852247518081, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  healAction: {fileID: 0}
 --- !u!58 &1585936353
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -4263,6 +4351,56 @@ MonoBehaviour:
   shakeStrength: 0.14
   shakeTime: 0.18
   flashColor: {r: 0.85, g: 0.95, b: 1, a: 1}
+--- !u!114 &1585936362
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1585936349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2de426bd7eb277e4790caaecf9c6375a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Player.PlayerAbilities
+  startWithCape: 1
+  startingAbilities: 15
+  cape: {fileID: 0}
+--- !u!114 &1585936363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1585936349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d63a632ad1c1af14790352d2b9cd4028, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Player.PlayerFx
+  sparkColor: {r: 1, g: 0.85, b: 0.5, a: 1}
+  bodyColor: {r: 0.95, g: 0.92, b: 0.82, a: 1}
+  parryColor: {r: 0.85, g: 0.95, b: 1, a: 1}
+  hurtColor: {r: 0.85, g: 0.1, b: 0.15, a: 1}
+  bigEnemyHealth: 20
+--- !u!114 &1585936364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1585936349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f23667b1f7a4684408ca78f3c11790c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Player.PlayerMend
+  maxThreads: 3
+  threadsPerHit: 0.125
+  threadsPerParry: 0.34
+  startingThreads: 1
+  mendTime: 0.6
+  mendColor: {r: 1, g: 0.9, b: 0.65, a: 1}
 --- !u!1 &1591869580
 GameObject:
   m_ObjectHideFlags: 0
@@ -5091,3 +5229,4 @@ SceneRoots:
   - {fileID: 279784072}
   - {fileID: 1264078446}
   - {fileID: 1000988788}
+  - {fileID: 320615749}

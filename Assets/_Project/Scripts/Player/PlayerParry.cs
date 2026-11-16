@@ -31,7 +31,7 @@ namespace ProjectCircle.Player
         [Tooltip("Minimum time between parries (from press to press). Stops it being held up like a shield.")]
         [SerializeField, Min(0f)] private float cooldown = 0.5f;
 
-        [Tooltip("Protection after a successful parry, so the rest of a beam or a second bolt can't hit in the same breath.")]
+        [Tooltip("After a successful parry, projectiles arriving within this time are deflected too (and the circle is protected), so a cluster can be answered with one press.")]
         [SerializeField, Min(0f)] private float successGrace = 0.3f;
 
         [Header("Feel")]
@@ -55,11 +55,13 @@ namespace ProjectCircle.Player
         private PlayerInputReader input;
         private PlayerHealth health;
         private PlayerAttack attack;
+        private PlayerAbilities abilities;
         private CameraFollow2D cameraFollow;
         private VertexGlow flash;
         private float activeUntil = float.NegativeInfinity;
         private float lastParryTime = float.NegativeInfinity;
         private float lastDeflectTime = float.NegativeInfinity;
+        private float lastSuccessTime = float.NegativeInfinity;
 
         #region Unity lifecycle
 
@@ -68,6 +70,7 @@ namespace ProjectCircle.Player
             input = GetComponent<PlayerInputReader>();
             health = GetComponent<PlayerHealth>();
             attack = GetComponent<PlayerAttack>();
+            abilities = GetComponent<PlayerAbilities>();
             if (cape == null) cape = GetComponentInChildren<PlayerCape>();
             CreateFlash();
         }
@@ -93,6 +96,7 @@ namespace ProjectCircle.Player
         private void HandleParryPressed()
         {
             if (Time.time < lastParryTime + cooldown || health.IsDead) return;
+            if (abilities != null && !abilities.Has(PlayerAbility.Parry)) return; // no cape yet
             if (cape != null && cape.IsFormingPlatform) return; // the cape is busy being a platform
 
             // The cape can't be a blade and a wrap at once: the parry wins.
@@ -110,7 +114,11 @@ namespace ProjectCircle.Player
         /// </summary>
         public bool TryDeflect(Vector2 point)
         {
-            if (!IsParrying) return false;
+            // A clean parry holds for a moment: anything else arriving within Success Grace is sent back too,
+            // so a cluster of projectiles can be answered with one well-timed press.
+            bool riding = Time.time < lastSuccessTime + successGrace;
+            if (!IsParrying && !riding) return false;
+            if (IsParrying) lastSuccessTime = Time.time;
 
             // Feedback once per moment, even if several things are deflected together.
             if (Time.unscaledTime > lastDeflectTime + 0.05f)

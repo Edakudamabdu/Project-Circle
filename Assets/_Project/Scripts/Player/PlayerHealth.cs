@@ -148,6 +148,14 @@ namespace ProjectCircle.Player
             HealthChanged?.Invoke(CurrentHealth, maxHealth);
         }
 
+        /// <summary>Sets health directly (e.g. waking up hurt in a cutscene). Clamped to 1..max.</summary>
+        public void SetHealth(int value)
+        {
+            if (IsDead) return;
+            CurrentHealth = Mathf.Clamp(value, 1, maxHealth);
+            HealthChanged?.Invoke(CurrentHealth, maxHealth);
+        }
+
         /// <summary>Where the circle respawns after dying (e.g. the last Mirror it rested at).</summary>
         public void SetRespawnPoint(Vector2 point) => respawnPoint = point;
 

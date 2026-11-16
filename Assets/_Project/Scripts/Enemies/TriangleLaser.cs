@@ -239,6 +239,7 @@ namespace ProjectCircle.Enemies
             damagedThisShot = false;
             reflected = false;
             SetPhase(Phase.Rise);
+            Systems.Fx.Converge(VertexPosition(), vertexGlowColor, riseTime + aimTime, 1.4f, 10); // charging the vertex
         }
 
         private void UpdateRise()

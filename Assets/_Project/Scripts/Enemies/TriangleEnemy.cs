@@ -322,6 +322,12 @@ namespace ProjectCircle.Enemies
         /// <summary>True if it can see the player right now.</summary>
         public bool CanSeeTarget => canSeeTarget;
 
+        /// <summary>
+        /// If true it always knows where the circle is (no detection range) and never patrols: it goes straight
+        /// for it. It still needs a clear line of sight to attack. Used for minions a boss summons.
+        /// </summary>
+        public bool AlwaysHunt { get; set; }
+
         /// <summary>True if hits shouldn't interrupt an attack it has committed to.</summary>
         public bool ArmoredWhileAttacking => armoredWhileAttacking;
 
@@ -569,7 +575,19 @@ namespace ProjectCircle.Enemies
 
             Vector2 from = EyePosition();
             Vector2 to = Target.position;
-            if ((to - from).sqrMagnitude > radius * radius) return;
+
+            // Summoned hunters always know where the circle is (so they keep chasing, any distance)...
+            if (AlwaysHunt)
+            {
+                lastSeenTime = Time.time;
+                lastKnownTargetPosition = to;
+            }
+            else if ((to - from).sqrMagnitude > radius * radius)
+            {
+                return;
+            }
+
+            // ...but only "see" it (and so attack) with a clear line of sight: no shooting through platforms.
             if (requireLineOfSight && Physics2D.Linecast(from, to, sightBlockers).collider != null) return;
 
             canSeeTarget = true;
@@ -587,6 +605,13 @@ namespace ProjectCircle.Enemies
 
         private void UpdateState()
         {
+            // Summoned to fight: skip patrolling and the alert pause, go straight for the circle.
+            if (AlwaysHunt && State != TriangleState.Chase)
+            {
+                SetState(TriangleState.Chase);
+                return;
+            }
+
             switch (State)
             {
                 case TriangleState.Patrol:

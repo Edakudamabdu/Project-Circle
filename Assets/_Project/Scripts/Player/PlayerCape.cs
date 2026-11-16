@@ -81,7 +81,7 @@ namespace ProjectCircle.Player
         [SerializeField, Range(0.3f, 4f)] private float spreadFalloff = 1.5f;
 
         [Header("Colours")]
-        [SerializeField] private Color capeColor = new Color(0.45f, 0.48f, 0.58f, 1f);
+        [SerializeField] private Color capeColor = new Color(0.72f, 0.14f, 0.19f, 1f); // red
 
         [Tooltip("How much darker every other strand is. This shades the cloth into soft pleats.")]
         [SerializeField, Range(0f, 1f)] private float pleatShade = 0.16f;

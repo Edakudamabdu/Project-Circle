@@ -212,6 +212,13 @@ namespace ProjectCircle.Systems
             body.position = to;
             player.ResetMotion();
 
+            // The glass ripples as the circle steps up to it.
+            if (glass != null)
+            {
+                Fx.Ring(glass.bounds.center, new Color(0.85f, 0.92f, 1f, 0.7f), glass.bounds.extents.y * 1.1f, 0.6f, 0.08f);
+                Fx.Ring(glass.bounds.center, new Color(0.85f, 0.92f, 1f, 0.5f), glass.bounds.extents.y * 0.7f, 0.45f, 0.06f);
+            }
+
             // Camera behind the circle, live reflection on.
             if (cameraFollow != null) cameraFollow.FocusOn(cameraFocus.position, cameraZoom);
             StartReflection();

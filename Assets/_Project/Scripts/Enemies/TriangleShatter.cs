@@ -34,6 +34,11 @@ namespace ProjectCircle.Enemies
             var root = new GameObject("Triangle Shatter").AddComponent<TriangleShatter>();
             root.transform.position = position;
             root.Build(circumradius, top, bottom, outline, glowColor, material, (position - awayFrom).normalized, lifetime);
+
+            // Every triangle death: a pop of light, a little dust and grit.
+            Systems.Fx.Ring(position, glowColor, circumradius * 2f, 0.3f, 0.12f);
+            Systems.Fx.Shards(position, top, Mathf.RoundToInt(6 + circumradius * 6f), 6f, 0.12f + circumradius * 0.05f);
+            Systems.Fx.Puff(position + Vector2.down * circumradius * 0.4f, 0.8f + circumradius * 0.4f);
         }
 
         private void Build(float circumradius, Color top, Color bottom, Color outline, Color glowColor,
