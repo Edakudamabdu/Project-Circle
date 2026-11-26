@@ -204,6 +204,7 @@ namespace ProjectCircle.Player
                 return;
             }
 
+
             if (jumpBufferTimer > 0f)
             {
                 if (coyoteTimer > 0f)

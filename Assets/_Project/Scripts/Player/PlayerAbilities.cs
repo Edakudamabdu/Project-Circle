@@ -18,8 +18,9 @@ namespace ProjectCircle.Player
     /// <summary>
     /// What the circle can do right now, and whether it wears the cape.
     ///
-    /// In the opening the circle has no cape (and so no attack, air jump or parry) until the strings in the
-    /// Hall of Strings form it. Everywhere else it starts with everything, so test scenes need no setup.
+    /// In the opening the circle has no cape until the strings in the Hall of Strings form it (blade and pogo
+    /// only); later strings add the dash, parry and double jump. What it has is kept in
+    /// <see cref="Systems.GameProgress"/>, so it carries from scene to scene.
     /// <see cref="PlayerMovement"/>, <see cref="PlayerAttack"/> and <see cref="PlayerParry"/> ask
     /// <see cref="Has"/> before doing a move.
     /// </summary>
@@ -51,8 +52,16 @@ namespace ProjectCircle.Player
             if (cape == null) cape = GetComponentInChildren<PlayerCape>(true);
             if (cape != null) capeRenderer = cape.GetComponent<Renderer>();
 
-            HasCape = startWithCape;
-            Unlocked = startingAbilities;
+            // The run's progress wins (the circle arrived through a door, or a RegionInfo started the run).
+            // Only a scene with neither (an old test scene) falls back to this component's own settings.
+            Systems.GameProgress.Begin(startWithCape, startingAbilities);
+            HasCape = Systems.GameProgress.HasCape;
+            Unlocked = Systems.GameProgress.Abilities;
+        }
+
+        private void Start()
+        {
+            if (!HasCape && capeRenderer != null) capeRenderer.enabled = false;
         }
 
         private void LateUpdate()
@@ -70,6 +79,7 @@ namespace ProjectCircle.Player
             HasCape = false;
             Unlocked = PlayerAbility.None;
             if (capeRenderer != null) capeRenderer.enabled = false;
+            Systems.GameProgress.SetCape(HasCape, Unlocked);
         }
 
         /// <summary>Gives the cape and unlocks <paramref name="abilities"/>.</summary>
@@ -79,7 +89,15 @@ namespace ProjectCircle.Player
             Unlocked |= abilities;
             if (cape != null) cape.ResetCape();
             if (capeRenderer != null) capeRenderer.enabled = true;
+            Systems.GameProgress.SetCape(HasCape, Unlocked);
             CapeGained?.Invoke();
+        }
+
+        /// <summary>A new cape string: unlocks <paramref name="abilities"/> (the cape must already be worn).</summary>
+        public void Grant(PlayerAbility abilities)
+        {
+            Unlocked |= abilities;
+            Systems.GameProgress.SetCape(HasCape, Unlocked);
         }
     }
 }

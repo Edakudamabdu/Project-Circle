@@ -6,17 +6,56 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/_Project/Scenes/Main.unity
-    guid: 5735899795983ef42bbe64cea0a67106
-  - enabled: 1
-    path: Assets/_Project/Scenes/EnemyTest.unity
-    guid: ef4886cf65da9464891308736fcaf617
-  - enabled: 1
     path: Assets/_Project/Scenes/StoryTest.unity
     guid: b2242f4ffdc439d41addcf8045c1ae82
   - enabled: 1
+    path: Assets/_Project/Scenes/Chapter1/Graveyard.unity
+    guid: 216b0b4ec4bbbab44b61ac2125cf8a54
+  - enabled: 1
+    path: Assets/_Project/Scenes/Chapter1/ScaleneSlums.unity
+    guid: 9bcf82515cae22c4cbff15824356f77b
+  - enabled: 1
+    path: Assets/_Project/Scenes/Chapter1/IsoscelesTerraces.unity
+    guid: 453c9db4ce47322419e31d0f92fb1f8d
+  - enabled: 1
+    path: Assets/_Project/Scenes/Chapter1/TwinIsosceles.unity
+    guid: 6fbafa93f223b6d4ab435126048b8f9a
+  - enabled: 1
+    path: Assets/_Project/Scenes/Chapter1/EquilateralSpire.unity
+    guid: adaeb03dcd626584583de42913f80b56
+  - enabled: 1
+    path: Assets/_Project/Scenes/Chapter1/ApexThrone.unity
+    guid: 5627b7ed912b1ca43bbf3f5510f68ddc
+  - enabled: 1
+    path: Assets/_Project/Scenes/Chapter1/TempleOfThreePoints.unity
+    guid: 54a0e480a98a976418bb95d56472ff18
+  - enabled: 1
+    path: Assets/_Project/Scenes/Chapter1/RoadToSquareRealm.unity
+    guid: eebd533257b5e3a44859e18b6f294358
+  - enabled: 1
+    path: Assets/_Project/Scenes/Chapter1/WhisperingFissure.unity
+    guid: 14d8e0296aab22742b8474cd66fb381d
+  - enabled: 1
+    path: Assets/_Project/Scenes/Chapter1/HallOfMeasure.unity
+    guid: 1634c601feee8af4c8b92f2d4ac5902d
+  - enabled: 1
+    path: Assets/_Project/Scenes/Chapter1/PrismCaverns.unity
+    guid: d7ad41ee8e1358e4c86f7e5c3f30215e
+  - enabled: 1
+    path: Assets/_Project/Scenes/Chapter1/RefractorLair.unity
+    guid: 25a20c9f078cd3a4592ee4e0d0b964d5
+  - enabled: 1
+    path: Assets/_Project/Scenes/Chapter1/SquaresRefuge.unity
+    guid: 8d85c05315f87b8429deb68dfd2b8ec2
+  - enabled: 1
+    path: Assets/_Project/Scenes/Chapter1/ShrineOfFirstBreak.unity
+    guid: 1dcf3a6710ea1404b8d739f2ae1b64f5
+  - enabled: 1
     path: Assets/_Project/Scenes/BossArena.unity
     guid: fa75d71de9cc47842878ba3e505bfdd0
+  - enabled: 1
+    path: Assets/_Project/Scenes/EnemyTest.unity
+    guid: ef4886cf65da9464891308736fcaf617
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

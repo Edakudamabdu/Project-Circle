@@ -28,6 +28,9 @@ namespace ProjectCircle.Enemies.Boss
         [Tooltip("Small shockwaves along the ledge top.")]
         [SerializeField] private GroundShockwave.Settings shockwave = SmallShockwave;
 
+        [Tooltip("Its vertices charge this colour in the squat before each leap.")]
+        [SerializeField] private Color powerGlow = new Color(1f, 0.8f, 0.5f, 1f);
+
         private float onLedgeSince = -1f;
 
         private static GroundShockwave.Settings SmallShockwave
@@ -73,13 +76,16 @@ namespace ProjectCircle.Enemies.Boss
                 for (float t = 0f; t < crouchTime; t += Time.deltaTime)
                 {
                     Boss.SetPose(new Vector2(0f, -0.25f * (t / crouchTime)), 0f);
+                    Boss.Shape.SetCornerGlow(RoundedTriangleMesh.AllCorners, t / crouchTime, powerGlow); // vertices charge the leap
                     yield return null;
                 }
                 Boss.ResetPose();
 
                 Bounds b = ledge.bounds;
                 Vector2 landing = new Vector2(b.center.x, b.max.y + Boss.Inradius);
+                Boss.Shape.SetCornerGlow(RoundedTriangleMesh.AllCorners, 0.6f, powerGlow);
                 yield return Boss.ArcTo(landing, arcHeight, riseGravity, fallGravity);
+                Boss.Shape.SetCornerGlow(-1, 0f, powerGlow); // spent on impact
                 Slam(b);
                 yield return new WaitForSeconds(pauseOnLedge * Boss.WindowScale);
             }
@@ -111,6 +117,7 @@ namespace ProjectCircle.Enemies.Boss
         public override void Cancel()
         {
             if (Boss != null) Boss.ResetPose();
+            if (Boss != null && Boss.Shape != null) Boss.Shape.SetCornerGlow(-1, 0f, powerGlow);
             onLedgeSince = -1f;
         }
     }

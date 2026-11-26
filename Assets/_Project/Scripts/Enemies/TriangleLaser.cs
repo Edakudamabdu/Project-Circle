@@ -144,6 +144,13 @@ namespace ProjectCircle.Enemies
             health = GetComponent<EnemyHealth>();
             CreateReflectedBeam();
             HideAll();
+
+            // Fire in its owner's colour (imperfect triangles each have their own).
+            float hue = TriangleKinds.HueShiftOf(this);
+            warningColor = TriangleKinds.Tint(warningColor, hue);
+            beamColor = TriangleKinds.Tint(beamColor, hue);
+            coreColor = TriangleKinds.Tint(coreColor, hue);
+            vertexGlowColor = TriangleKinds.Tint(vertexGlowColor, hue);
         }
 
         private void OnEnable()
@@ -322,7 +329,7 @@ namespace ProjectCircle.Enemies
             SetVertexGlow(0f);
             if (enemy != null) enemy.EndAttack();
             phase = Phase.Ready;
-            nextAttackTime = Time.time + cooldown;
+            nextAttackTime = Time.time + cooldown / Mathf.Max(0.1f, enemy.EffectiveHaste); // an Overseer makes it attack more often
         }
 
         #endregion

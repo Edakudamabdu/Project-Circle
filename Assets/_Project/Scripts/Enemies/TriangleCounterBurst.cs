@@ -91,6 +91,13 @@ namespace ProjectCircle.Enemies
             health = GetComponent<EnemyHealth>();
             body = GetComponent<Rigidbody2D>();
             slam = GetComponent<TriangleSlam>();
+
+            // Flare and shockwave in its owner's colour.
+            float hue = TriangleKinds.HueShiftOf(this);
+            flareColor = TriangleKinds.Tint(flareColor, hue);
+            shockwave.topColor = TriangleKinds.Tint(shockwave.topColor, hue);
+            shockwave.bottomColor = TriangleKinds.Tint(shockwave.bottomColor, hue);
+            shockwave.outlineColor = TriangleKinds.Tint(shockwave.outlineColor, hue);
         }
 
         private void Start() => cameraFollow = FindAnyObjectByType<CameraFollow2D>();

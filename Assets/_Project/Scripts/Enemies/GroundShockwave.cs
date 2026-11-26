@@ -22,8 +22,11 @@ namespace ProjectCircle.Enemies
             [Tooltip("How far it travels before sinking away.")]
             [Min(0.1f)] public float distance;
 
-            [Tooltip("Height of the leading shard (and of the area that hurts).")]
+            [Tooltip("Height of the leading shard.")]
             [Min(0.1f)] public float height;
+
+            [Tooltip("Height of the area that hurts, as a fraction of Height (0 = same as Height). Lower it to let the circle skim over the shards.")]
+            [Range(0f, 1f)] public float hitHeightFraction;
 
             [Min(0)] public int damage;
 
@@ -176,8 +179,10 @@ namespace ProjectCircle.Enemies
         {
             if (hasHit || settings.damage <= 0) return;
 
-            Vector2 centre = new Vector2(transform.position.x - direction * settings.height * 0.4f, floorY + settings.height * 0.45f);
-            Vector2 size = new Vector2(settings.height * 1.2f, settings.height * 0.9f);
+            // The hurting area can be lower than the shard looks (hitHeightFraction), so a well-timed jump skims it.
+            float hitHeight = settings.height * 0.9f * (settings.hitHeightFraction > 0f ? settings.hitHeightFraction : 1f);
+            Vector2 centre = new Vector2(transform.position.x - direction * settings.height * 0.4f, floorY + hitHeight * 0.5f);
+            Vector2 size = new Vector2(settings.height * 1.2f, hitHeight);
             Collider2D player = Physics2D.OverlapBox(centre, size, 0f, settings.playerLayers);
             if (player == null) return;
 

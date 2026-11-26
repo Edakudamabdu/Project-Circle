@@ -165,7 +165,9 @@ namespace ProjectCircle.Enemies
             if (shield != null) shield.SetEnraged(true);
             if (cameraFollow != null) cameraFollow.Shake(enrageShakeStrength, enrageShakeTime);
             if (enemy.Shape != null) enemy.Shape.SetCornerGlow(-1, 0f, Color.white);
-            enemy.SetColours(enragedTop, enragedBottom, enragedTop, enragedBottom);
+            float hue = TriangleKinds.HueShiftOf(this); // enraged, but still in its own colour
+            Color top = TriangleKinds.Tint(enragedTop, hue), bottom = TriangleKinds.Tint(enragedBottom, hue);
+            enemy.SetColours(top, bottom, top, bottom);
         }
 
         #endregion

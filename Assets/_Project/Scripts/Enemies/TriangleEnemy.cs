@@ -46,7 +46,7 @@ namespace ProjectCircle.Enemies
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody2D), typeof(PolygonCollider2D))]
-    public sealed class TriangleEnemy : MonoBehaviour
+    public sealed class TriangleEnemy : MonoBehaviour, ITriangleLook
     {
         private const float TumbleAngle = 120f;   // an equilateral triangle turns 120° to land on its next side
         private const float Sqrt3 = 1.7320508f;
@@ -123,6 +123,14 @@ namespace ProjectCircle.Enemies
 
         [Tooltip("How long the surprised hop lasts before it starts chasing.")]
         [SerializeField, Min(0f)] private float alertTime = 0.35f;
+
+        [Header("Kind (rank)")]
+        [Tooltip("Scalene (uneven, least aggressive), Isosceles, Equilateral (perfect, most aggressive). Standard = plain, no rank changes.")]
+        [SerializeField] private TriangleKind kind = TriangleKind.Standard;
+
+        [Tooltip("Scalene and isosceles triangles each get their own proportions and colour (abilities included), " +
+                 "picked from this seed. 0 = pick from where it's placed. Type any other number to choose a look.")]
+        [SerializeField] private int lookSeed;
 
         [Header("Chase")]
         [Tooltip("Horizontal distance it closes to before standing its ground and attacking.")]
@@ -328,6 +336,47 @@ namespace ProjectCircle.Enemies
         /// </summary>
         public bool AlwaysHunt { get; set; }
 
+        /// <summary>
+        /// Speed of its decisions and movement (1 = normal). An <see cref="Overseer"/> drives its triangles
+        /// above 1; below 1 it moves sluggishly (faltering).
+        /// </summary>
+        public float Haste { get; set; } = 1f;
+
+        /// <summary>Its kind (rank): scalene, isosceles or equilateral. Set before Awake (in the Inspector).</summary>
+        public TriangleKind Kind => kind;
+
+        /// <summary>Overseer haste times its rank's pace: the more perfect the triangle, the faster it acts.</summary>
+        public float EffectiveHaste => Haste * TriangleKinds.Haste(kind);
+
+        /// <summary>The seed its individual look comes from (see <see cref="TriangleKinds.LookFor"/>).</summary>
+        public int LookSeed { get { EnsureLook(); return resolvedSeed; } }
+
+        /// <summary>How far its palette (body and abilities) is turned round the colour wheel.</summary>
+        public float HueShift { get { EnsureLook(); return look.HueShift; } }
+
+        private TriangleKinds.Look look;
+        private bool lookReady;
+        private int resolvedSeed;
+
+        /// <summary>Works out its look once (from the seed, or from where it was placed).</summary>
+        private void EnsureLook()
+        {
+            if (lookReady) return;
+            lookReady = true;
+            resolvedSeed = lookSeed != 0 ? lookSeed : TriangleKinds.SeedFrom(transform.position);
+            look = TriangleKinds.LookFor(kind, resolvedSeed);
+        }
+
+        /// <summary>
+        /// Horizontal distance it closes to before standing its ground. Settable at runtime, e.g. so the pieces
+        /// of a <see cref="Splitter"/> stand at different distances instead of stacking on one spot.
+        /// </summary>
+        public float PreferredDistance
+        {
+            get => preferredDistance;
+            set => preferredDistance = Mathf.Max(0f, value);
+        }
+
         /// <summary>True if hits shouldn't interrupt an attack it has committed to.</summary>
         public bool ArmoredWhileAttacking => armoredWhileAttacking;
 
@@ -398,6 +447,7 @@ namespace ProjectCircle.Enemies
         private Motion motion = Motion.Idle;
         private int moveDirection = 1;
         private float motionStartTime;
+        private float clock; // its own time, running at Haste speed (see FixedUpdate)
         private float stepStartX;
         private float stepDuration;
         private float restTimer;
@@ -460,8 +510,28 @@ namespace ProjectCircle.Enemies
 
             groundFilter = new ContactFilter2D { useLayerMask = true, layerMask = groundLayers, useTriggers = false };
 
+            // A piece of a split triangle takes its parent's kind and look.
+            if (TriangleKinds.TakeInheritance(out TriangleKind inheritedKind, out int inheritedSeed))
+            {
+                kind = inheritedKind;
+                lookSeed = inheritedSeed;
+            }
+            EnsureLook();
+
             CacheGeometry();
+            TriangleKinds.ApplyFrame(visual, look.Width, look.Lean); // its own proportions (none for equilateral)
             FitColliderToShape();
+
+            // Its own colour: the whole palette turned round the colour wheel (abilities follow in their Start).
+            if (!Mathf.Approximately(look.HueShift, 0f))
+            {
+                calmTop = TriangleKinds.Tint(calmTop, look.HueShift);
+                calmBottom = TriangleKinds.Tint(calmBottom, look.HueShift);
+                angryTop = TriangleKinds.Tint(angryTop, look.HueShift);
+                angryBottom = TriangleKinds.Tint(angryBottom, look.HueShift);
+                glowColor = TriangleKinds.Tint(glowColor, look.HueShift);
+                if (shape != null) shape.SetFill(calmTop, calmBottom);
+            }
 
             homeX = transform.position.x;
             if (eye != null) eyeBaseScale = eye.localScale;
@@ -496,7 +566,10 @@ namespace ProjectCircle.Enemies
 
         private void FixedUpdate()
         {
-            float dt = Time.fixedDeltaTime;
+            // Its own clock runs at Haste speed (an Overseer speeds it up, faltering slows it): every tumble,
+            // charge, rest and cooldown below is timed on it. Physics still steps in real time.
+            float dt = Time.fixedDeltaTime * EffectiveHaste;
+            clock += dt;
 
             IsGrounded = ProbeGround();
             if (IsGrounded && !homeFloorKnown)
@@ -515,17 +588,17 @@ namespace ProjectCircle.Enemies
 
                 case Motion.Charging:
                     body.linearVelocity = new Vector2(0f, body.linearVelocity.y);
-                    if (Time.time - motionStartTime >= ChargeDuration) Launch();
+                    if (clock - motionStartTime >= ChargeDuration) Launch();
                     return;
 
                 case Motion.Airborne:
                     // Landed once it is back on the ground and no longer rising.
-                    if (Time.time - motionStartTime > 0.1f && IsGrounded && body.linearVelocity.y <= 0.01f) Land();
+                    if (clock - motionStartTime > 0.1f && IsGrounded && body.linearVelocity.y <= 0.01f) Land();
                     return;
 
                 case Motion.Stunned:
                     // Knocked back by a hit: recover once the stun has passed and it is back on the ground.
-                    if (Time.time - motionStartTime >= hitStunTime && IsGrounded && body.linearVelocity.y <= 0.01f)
+                    if (clock - motionStartTime >= hitStunTime && IsGrounded && body.linearVelocity.y <= 0.01f)
                     {
                         motion = Motion.Idle;
                         body.linearVelocity = new Vector2(0f, body.linearVelocity.y);
@@ -571,7 +644,7 @@ namespace ProjectCircle.Enemies
             if (Target == null) return;
 
             bool hunting = State == TriangleState.Chase || State == TriangleState.Alert;
-            float radius = hunting ? loseRadius : detectionRadius;
+            float radius = (hunting ? loseRadius : detectionRadius) * TriangleKinds.Sight(kind);
 
             Vector2 from = EyePosition();
             Vector2 to = Target.position;
@@ -630,7 +703,7 @@ namespace ProjectCircle.Enemies
                     break;
 
                 case TriangleState.Alert:
-                    if (Time.time - stateStartTime >= alertTime)
+                    if (clock - stateStartTime >= alertTime)
                     {
                         SetState(canSeeTarget ? TriangleState.Chase : TriangleState.Return);
                     }
@@ -648,7 +721,7 @@ namespace ProjectCircle.Enemies
 
             TriangleState previous = State;
             State = next;
-            stateStartTime = Time.time;
+            stateStartTime = clock;
             holding = false;
             restTimer = 0f;
 
@@ -747,7 +820,7 @@ namespace ProjectCircle.Enemies
                 return;
             }
 
-            if (!onHomeFloor && (Time.time < lastJumpTime + jumpCooldown || Time.time < nextPlanTime))
+            if (!onHomeFloor && (clock < lastJumpTime + jumpCooldown || clock < nextPlanTime))
             {
                 restTimer = 0.1f; // wait for the next chance to jump
                 return;
@@ -820,8 +893,8 @@ namespace ProjectCircle.Enemies
         /// </summary>
         private bool TryPlanJump(Func<float, float, float> score)
         {
-            if (!canJump || Time.time < lastJumpTime + jumpCooldown || Time.time < nextPlanTime) return false;
-            nextPlanTime = Time.time + PlanInterval;
+            if (!canJump || clock < lastJumpTime + jumpCooldown || clock < nextPlanTime) return false;
+            nextPlanTime = clock + PlanInterval;
 
             Vector2 start = body.position;
             float startFloor = FloorY;
@@ -1027,7 +1100,7 @@ namespace ProjectCircle.Enemies
         private bool TryPounce(Vector2 target, float distance)
         {
             if (!canJump || distance > pounceRange || !canSeeTarget || !targetFloorKnown) return false;
-            if (Time.time < lastPounceTime + pounceCooldown || Time.time < lastJumpTime + jumpCooldown * 0.5f) return false;
+            if (clock < lastPounceTime + pounceCooldown || clock < lastJumpTime + jumpCooldown * 0.5f) return false;
 
             // The player must actually be standing on (or just above) that floor, not mid-jump.
             if (target.y - targetFloorY > circumradius * 1.5f) return false;
@@ -1041,7 +1114,7 @@ namespace ProjectCircle.Enemies
                 Vector2 landing = new Vector2(x, targetFloorY + inradius);
                 if (!SolveArc(start, landing, out Vector2 velocity, out float time)) continue;
 
-                lastPounceTime = Time.time;
+                lastPounceTime = clock;
                 BeginCharge(velocity, landing, time, forceBoost: true, chargeTime: pounceChargeTime);
                 return true;
             }
@@ -1057,7 +1130,7 @@ namespace ProjectCircle.Enemies
         {
             motion = Motion.Charging;
             chargeTimeOverride = chargeTime;
-            motionStartTime = Time.time;
+            motionStartTime = clock;
             jumpVelocity = velocity;
             jumpTarget = landing;
             flightTime = time;
@@ -1087,9 +1160,9 @@ namespace ProjectCircle.Enemies
             launchOffset = pose.offset;
 
             motion = Motion.Airborne;
-            motionStartTime = Time.time;
-            lastJumpTime = Time.time;
-            if (jumpIsBoosted) lastLaunchTime = Time.time;
+            motionStartTime = clock;
+            lastJumpTime = clock;
+            if (jumpIsBoosted) lastLaunchTime = clock;
 
             // Spin a whole number of thirds so it lands flat on a side.
             int turns = Mathf.Max(1, Mathf.RoundToInt(flightTime / 0.45f));
@@ -1161,7 +1234,7 @@ namespace ProjectCircle.Enemies
             motion = Motion.Tumbling;
             moveDirection = direction;
             stepDuration = duration;
-            motionStartTime = Time.time;
+            motionStartTime = clock;
             stepStartX = body.position.x;
             if (State != TriangleState.Chase) FacingDirection = direction;
         }
@@ -1169,10 +1242,11 @@ namespace ProjectCircle.Enemies
         private void FollowTumble(float dt)
         {
             // Move the body so its centre follows the tumbling triangle exactly.
-            float targetX = stepStartX + GetTumble(Time.time).offset.x;
-            body.linearVelocity = new Vector2((targetX - body.position.x) / dt, body.linearVelocity.y);
+            float targetX = stepStartX + GetTumble(clock).offset.x;
+            // Physics moves the body over one real step, so divide by the real step (not the hasted dt).
+            body.linearVelocity = new Vector2((targetX - body.position.x) / Time.fixedDeltaTime, body.linearVelocity.y);
 
-            if (Time.time - motionStartTime >= anticipationTime + stepDuration)
+            if (clock - motionStartTime >= anticipationTime + stepDuration)
             {
                 motion = Motion.Idle;
                 body.linearVelocity = new Vector2(0f, body.linearVelocity.y);
@@ -1234,7 +1308,7 @@ namespace ProjectCircle.Enemies
             float angle = 0f;
             float crouch = 0f;
             float glow = 0f;
-            float now = Time.time;
+            float now = clock + (Time.time - Time.fixedTime) * EffectiveHaste; // the body clock, between physics steps
 
             switch (motion)
             {
@@ -1347,7 +1421,9 @@ namespace ProjectCircle.Enemies
             if (eye == null) return;
 
             // The eye rides the centre of the triangle (which every rotation turns around), so it never spins.
-            eye.localPosition = centre + new Vector3(0f, inradius * 0.12f, 0f);
+            // (Through the kind frame, if any, so it stays on the reshaped body.)
+            Vector3 c = visual.parent != transform ? transform.InverseTransformPoint(visual.parent.TransformPoint(centre)) : centre;
+            eye.localPosition = new Vector3(c.x, c.y, centre.z) + new Vector3(0f, inradius * 0.12f, 0f);
 
             // Blink now and then.
             float blink = 1f;
@@ -1456,7 +1532,7 @@ namespace ProjectCircle.Enemies
             if (armoredWhileAttacking && (IsAttackLocked || chargingPounce)) return;
 
             // Hit back: free to pounce again the moment it recovers.
-            if (retaliates) lastPounceTime = Time.time - pounceCooldown;
+            if (retaliates) lastPounceTime = clock - pounceCooldown;
 
             // Whatever it was doing is interrupted.
             if (IsAttackLocked) EndAttack();
@@ -1466,7 +1542,7 @@ namespace ProjectCircle.Enemies
             // Knocked back away from the hit.
             stunDirection = body.position.x >= source.x ? 1 : -1;
             motion = Motion.Stunned;
-            motionStartTime = Time.time;
+            motionStartTime = clock;
             body.linearVelocity = new Vector2(stunDirection * hitKnockbackSpeed, hitKnockbackLift);
         }
 
@@ -1508,6 +1584,12 @@ namespace ProjectCircle.Enemies
             if (polygon == null) polygon = GetComponent<PolygonCollider2D>();
 
             RoundedTriangleMesh.BuildOutline(outlinePoints, shape.Circumradius, shape.CornerRadius, Mathf.Min(shape.SegmentsPerCorner, 3));
+            // Its own proportions reshape the visual; the collider takes the same shape so hits match.
+            EnsureLook();
+            if (!Mathf.Approximately(look.Width, 1f) || !Mathf.Approximately(look.Lean, 0f))
+            {
+                for (int i = 0; i < outlinePoints.Count; i++) outlinePoints[i] = TriangleKinds.Map(outlinePoints[i], look.Width, look.Lean);
+            }
             polygon.SetPath(0, outlinePoints);
         }
 

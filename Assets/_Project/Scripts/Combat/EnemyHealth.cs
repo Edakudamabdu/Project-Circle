@@ -26,8 +26,33 @@ namespace ProjectCircle.Combat
         public bool IsDead { get; private set; }
 
         private float lastHitTime = float.NegativeInfinity;
+        private float invulnerableUntil = float.NegativeInfinity;
+
+        /// <summary>True while hits are ignored (see <see cref="MakeInvulnerable"/>).</summary>
+        public bool IsInvulnerable => Time.time < invulnerableUntil;
+
+        /// <summary>
+        /// Extra hit points granted from outside (an Overseer's command). Hits use these up before real health,
+        /// and they can be taken away at any time (<see cref="SetWard"/> 0).
+        /// </summary>
+        public int Ward { get; private set; }
+
+        /// <summary>Raised when <see cref="Ward"/> changes (granted, chipped or removed).</summary>
+        public event Action<int> WardChanged;
 
         private void Awake() => CurrentHealth = maxHealth;
+
+        /// <summary>Sets the extra hit points (0 removes them).</summary>
+        public void SetWard(int points)
+        {
+            points = Mathf.Max(0, points);
+            if (points == Ward) return;
+            Ward = points;
+            WardChanged?.Invoke(Ward);
+        }
+
+        /// <summary>Ignores all hits for <paramref name="seconds"/> (e.g. pieces of a Splitter as they fly apart).</summary>
+        public void MakeInvulnerable(float seconds) => invulnerableUntil = Mathf.Max(invulnerableUntil, Time.time + seconds);
 
         /// <summary>Back to full health and alive (e.g. a boss fight restarting after the player died).</summary>
         public void ResetHealth()
@@ -43,9 +68,19 @@ namespace ProjectCircle.Combat
         /// </summary>
         public bool TakeHit(int damage, Vector2 sourcePosition)
         {
-            if (IsDead || damage <= 0 || Time.time < lastHitTime + hitCooldown) return false;
+            if (IsDead || damage <= 0 || Time.time < lastHitTime + hitCooldown || IsInvulnerable) return false;
 
             lastHitTime = Time.time;
+
+            // The ward soaks damage first.
+            if (Ward > 0)
+            {
+                int soaked = Mathf.Min(Ward, damage);
+                damage -= soaked;
+                Ward -= soaked;
+                WardChanged?.Invoke(Ward);
+            }
+
             CurrentHealth = Mathf.Max(0, CurrentHealth - damage);
             Hit?.Invoke(damage, sourcePosition);
 

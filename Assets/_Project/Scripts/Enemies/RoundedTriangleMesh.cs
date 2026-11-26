@@ -49,6 +49,9 @@ namespace ProjectCircle.Enemies
         private bool needsRebuild;
 
         // Corner glow (vertex power): which corner, how strongly, and in what colour.
+        /// <summary>Pass as the corner to <see cref="SetCornerGlow"/> to light all three corners at once.</summary>
+        public const int AllCorners = 3;
+
         private int glowCorner = -1;
         private float glowAmount;
         private Color glowColor = Color.white;
@@ -129,7 +132,7 @@ namespace ProjectCircle.Enemies
         /// <summary>
         /// Lights up one corner of the shape (0 = top, 1 = bottom-left, 2 = bottom-right, at rest).
         /// The fill and outline near that corner blend towards <paramref name="color"/>.
-        /// Pass a corner of -1 or an amount of 0 to turn it off.
+        /// Pass a corner of -1 or an amount of 0 to turn it off, or <see cref="AllCorners"/> to light all three.
         /// </summary>
         public void SetCornerGlow(int corner, float amount, Color color)
         {
@@ -288,9 +291,15 @@ namespace ProjectCircle.Enemies
         private float GlowWeight(Vector2 point)
         {
             if (glowCorner < 0 || glowAmount <= 0f) return 0f;
-            float distance = Vector2.Distance(point, GetCornerPoint(glowCorner));
-            float falloff = 1f - Mathf.Clamp01(distance / (circumradius * 0.9f));
-            return glowAmount * falloff * falloff;
+            float best = 0f;
+            for (int c = 0; c < 3; c++)
+            {
+                if (glowCorner != AllCorners && c != glowCorner) continue;
+                float distance = Vector2.Distance(point, GetCornerPoint(c));
+                float falloff = 1f - Mathf.Clamp01(distance / (circumradius * (glowCorner == AllCorners ? 0.6f : 0.9f)));
+                best = Mathf.Max(best, falloff * falloff);
+            }
+            return glowAmount * best;
         }
 
         /// <summary>

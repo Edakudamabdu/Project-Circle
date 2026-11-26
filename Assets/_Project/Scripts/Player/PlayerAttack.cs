@@ -123,6 +123,12 @@ namespace ProjectCircle.Player
 
         public bool IsAttacking => attacking;
 
+        /// <summary>The direction of the current (or last) swing.</summary>
+        public AttackDirection Direction => direction;
+
+        /// <summary>True while a down swing is in progress: hazards like a Spire's tip let it win.</summary>
+        public bool IsDownSwinging => attacking && direction == AttackDirection.Down;
+
         private PlayerMovement movement;
         private PlayerInputReader input;
         private PlayerHealth health;

@@ -25,6 +25,9 @@ namespace ProjectCircle.Enemies.Boss
         [SerializeField] private GroundShockwave.Settings shockwave = GroundShockwave.Settings.Default;
         [SerializeField, Min(0f)] private float landingRadius = 1.6f;
 
+        [Tooltip("Its vertices charge this colour in the squat before each leap.")]
+        [SerializeField] private Color powerGlow = new Color(1f, 0.8f, 0.5f, 1f);
+
         public override IEnumerator Run()
         {
             for (int i = 0; i < slams; i++)
@@ -34,12 +37,15 @@ namespace ProjectCircle.Enemies.Boss
                 {
                     float p = t / crouchTime;
                     Boss.SetPose(new Vector2(0f, -0.25f * p), 0f);
+                    Boss.Shape.SetCornerGlow(RoundedTriangleMesh.AllCorners, p, powerGlow); // vertices charge the leap
                     yield return null;
                 }
                 Boss.ResetPose();
 
                 float targetX = Boss.Target != null ? Boss.Target.position.x : Boss.Body.position.x;
+                Boss.Shape.SetCornerGlow(RoundedTriangleMesh.AllCorners, 0.6f, powerGlow);
                 yield return Boss.LeapTo(targetX, leapHeight, riseGravity, fallGravity);
+                Boss.Shape.SetCornerGlow(-1, 0f, powerGlow); // spent on impact
                 Impact();
 
                 if (i < slams - 1) yield return new WaitForSeconds(betweenSlams);
@@ -62,7 +68,9 @@ namespace ProjectCircle.Enemies.Boss
 
         public override void Cancel()
         {
-            if (Boss != null) Boss.ResetPose();
+            if (Boss == null) return;
+            Boss.ResetPose();
+            if (Boss.Shape != null) Boss.Shape.SetCornerGlow(-1, 0f, powerGlow);
         }
     }
 }

@@ -8,8 +8,9 @@ namespace ProjectCircle.Enemies.Boss
     /// firing lasers from all three corners at once. It turns a little and fires again, three volleys in all,
     /// then drops back down.
     ///
-    /// There is deliberately no warning glow: the cue is the boss going to the centre and jumping. The beam
-    /// angles are the same every time, so players learn where to stand. The beams pass through ledges.
+    /// Before each volley, thin trace lines show where the beams will go (<see cref="traceTime"/>). At the top it
+    /// turns so one corner points straight at the circle, so the first volley always has a beam on it (move!);
+    /// the turns between volleys are fixed, so the rest of the pattern can be learned. Beams pass through ledges.
     /// A parried beam hurts the boss instead.
     /// </summary>
     public sealed class BossBarrageMove : BossMove
@@ -23,8 +24,16 @@ namespace ProjectCircle.Enemies.Boss
         [Header("Volleys")]
         [SerializeField, Range(1, 6)] private int volleys = 3;
 
+        [Tooltip("At the top it turns this long to point a corner at the circle before the first volley.")]
+        [SerializeField, Min(0.05f)] private float aimTime = 0.35f;
+
         [Tooltip("Turn between volleys, in degrees (negative = clockwise). Fixed so the pattern can be learned.")]
         [SerializeField] private float turnPerVolley = -40f;
+
+        [Tooltip("Before each volley, thin trace lines show where the beams will go for this long (they don't hurt).")]
+        [SerializeField, Min(0f)] private float traceTime = 0.45f;
+
+        [SerializeField] private Color traceColor = new Color(1f, 0.82f, 0.55f, 0.65f);
 
         [Tooltip("How long each volley's beams stay on (they hurt the whole time).")]
         [SerializeField, Min(0.05f)] private float fireTime = 0.4f;
@@ -41,6 +50,7 @@ namespace ProjectCircle.Enemies.Boss
         [SerializeField, Min(1f)] private float beamLength = 45f;
 
         private LineRenderer[] beams;
+        private LineRenderer[] traces;
         private readonly bool[] parried = new bool[3];
         private bool hurtThisBarrage;
         private readonly float[] nextSparkTime = new float[3];
@@ -63,9 +73,36 @@ namespace ProjectCircle.Enemies.Boss
             Boss.Body.gravityScale = 0f;
             Boss.Body.linearVelocity = Vector2.zero;
 
+            // Turn so the nearest corner points straight at the circle: the first volley always has a beam on it.
+            // (Following it during the turn, then locking on as it fires: move to dodge.)
             float angle = 0f;
+            for (float t = 0f; t < aimTime; t += Time.deltaTime)
+            {
+                float target = AimAngle();
+                angle = Mathf.LerpAngle(angle, target, Mathf.Clamp01(t / aimTime * 1.5f));
+                Boss.SetPose(Vector2.zero, angle);
+                yield return null;
+            }
+            angle = AimAngle();
+            Boss.SetPose(Vector2.zero, angle);
+
             for (int v = 0; v < volleys; v++)
             {
+                // Trace: thin lines show where this volley will go, blinking faster just before it fires.
+                if (traceTime > 0f)
+                {
+                    SetTraces(true);
+                    for (float t = 0f; t < traceTime; t += Time.deltaTime)
+                    {
+                        float p = t / traceTime;
+                        bool on = Mathf.Repeat(t * Mathf.Lerp(6f, 16f, p), 1f) < 0.6f;
+                        UpdateTraces(on ? Mathf.Lerp(0.6f, 1f, p) : 0.25f);
+                        Boss.Shape.SetCornerGlow(RoundedTriangleMesh.AllCorners, Mathf.Lerp(0.4f, 1f, p), beamColor); // all three vertices charge
+                        yield return null;
+                    }
+                    SetTraces(false);
+                }
+
                 // Fire.
                 for (int i = 0; i < 3; i++) parried[i] = false;
                 SetBeams(true);
@@ -74,9 +111,11 @@ namespace ProjectCircle.Enemies.Boss
                 for (float t = 0f; t < fireTime; t += Time.deltaTime)
                 {
                     UpdateBeams();
+                    Boss.Shape.SetCornerGlow(RoundedTriangleMesh.AllCorners, 1f, Color.white); // white-hot while firing
                     yield return null;
                 }
                 SetBeams(false);
+                Boss.Shape.SetCornerGlow(RoundedTriangleMesh.AllCorners, 0.35f, beamColor); // cooling between volleys
 
                 // Turn for the next volley.
                 if (v < volleys - 1)
@@ -94,6 +133,7 @@ namespace ProjectCircle.Enemies.Boss
             }
 
             // Drop, turning back to the nearest upright pose on the way down.
+            Boss.Shape.SetCornerGlow(-1, 0f, beamColor);
             RestoreGravity();
             float settleFrom = angle;
             float settleTo = Mathf.Round(angle / 120f) * 120f;
@@ -113,8 +153,28 @@ namespace ProjectCircle.Enemies.Boss
         public override void Cancel()
         {
             SetBeams(false);
+            SetTraces(false);
+            if (Boss != null && Boss.Shape != null) Boss.Shape.SetCornerGlow(-1, 0f, beamColor);
             RestoreGravity();
             if (Boss != null) Boss.ResetPose();
+        }
+
+        /// <summary>
+        /// The smallest turn (degrees, from upright) that points one of the three corners straight at the circle.
+        /// At rest the corners point at 90°, 210° and 330°.
+        /// </summary>
+        private float AimAngle()
+        {
+            if (Boss.Target == null) return 0f;
+            Vector2 to = (Vector2)Boss.Target.position - (Vector2)Boss.Shape.transform.position;
+            float aim = Mathf.Atan2(to.y, to.x) * Mathf.Rad2Deg;
+            float best = 0f, bestAbs = float.PositiveInfinity;
+            for (int k = 0; k < 3; k++)
+            {
+                float turn = Mathf.DeltaAngle(90f + 120f * k, aim);
+                if (Mathf.Abs(turn) < bestAbs) { bestAbs = Mathf.Abs(turn); best = turn; }
+            }
+            return best;
         }
 
         private void RestoreGravity()
@@ -173,8 +233,51 @@ namespace ProjectCircle.Enemies.Boss
             foreach (LineRenderer b in beams) b.enabled = on;
         }
 
+        private void SetTraces(bool on)
+        {
+            if (traces == null) return;
+            foreach (LineRenderer t in traces) t.enabled = on;
+        }
+
+        /// <summary>Lays each trace along the path its beam will take (same clipping as the beams).</summary>
+        private void UpdateTraces(float alpha)
+        {
+            Vector2 centre = Boss.Shape.transform.position;
+            Color c = new Color(traceColor.r, traceColor.g, traceColor.b, traceColor.a * alpha);
+            for (int i = 0; i < 3; i++)
+            {
+                Vector2 origin = Boss.Corner(i);
+                Vector2 dir = (origin - centre).normalized;
+                Vector2 end = Boss.ClipToArena(origin, dir);
+                if (Vector2.Distance(origin, end) > beamLength) end = origin + dir * beamLength;
+                traces[i].SetPosition(0, origin);
+                traces[i].SetPosition(1, end);
+                traces[i].startColor = c;
+                traces[i].endColor = new Color(c.r, c.g, c.b, c.a * 0.5f);
+            }
+        }
+
         private void EnsureBeams()
         {
+            if (traces == null)
+            {
+                traces = new LineRenderer[3];
+                for (int i = 0; i < 3; i++)
+                {
+                    var go = new GameObject("Barrage Trace " + i);
+                    go.transform.SetParent(transform, false);
+                    var line = go.AddComponent<LineRenderer>();
+                    line.sharedMaterial = beamMaterial != null ? beamMaterial : Systems.Fx.Material;
+                    line.useWorldSpace = true;
+                    line.positionCount = 2;
+                    line.widthMultiplier = 0.08f;
+                    line.sortingOrder = 8;
+                    line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    line.receiveShadows = false;
+                    line.enabled = false;
+                    traces[i] = line;
+                }
+            }
             if (beams != null) return;
             beams = new LineRenderer[3];
             for (int i = 0; i < 3; i++)

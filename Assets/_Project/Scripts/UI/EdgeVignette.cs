@@ -12,19 +12,19 @@ namespace ProjectCircle.UI
     public sealed class EdgeVignette : MaskableGraphic
     {
         [Tooltip("How far the glow reaches in from the edges, in canvas units.")]
-        [SerializeField, Min(1f)] private float depth = 140f;
+        [SerializeField, Min(1f)] private float glowDepth = 140f;
 
         public float Depth
         {
-            get => depth;
-            set { depth = value; SetVerticesDirty(); }
+            get => glowDepth;
+            set { glowDepth = value; SetVerticesDirty(); }
         }
 
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();
             Rect r = rectTransform.rect;
-            float d = Mathf.Min(depth, r.width * 0.5f, r.height * 0.5f);
+            float d = Mathf.Min(glowDepth, r.width * 0.5f, r.height * 0.5f);
             Color outer = color;
             Color inner = new Color(color.r, color.g, color.b, 0f);
 

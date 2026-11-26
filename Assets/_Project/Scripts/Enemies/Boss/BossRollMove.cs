@@ -45,6 +45,9 @@ namespace ProjectCircle.Enemies.Boss
         [Tooltip("Roll step time when enraged.")]
         [SerializeField, Min(0.04f)] private float enragedRollStepTime = 0.26f;
 
+        [Tooltip("Its vertices burn this colour while it rolls on power.")]
+        [SerializeField] private Color rollGlow = new Color(1f, 0.7f, 0.4f, 1f);
+
         private static HomingOrb.Settings DefaultBolt
         {
             get
@@ -74,14 +77,20 @@ namespace ProjectCircle.Enemies.Boss
             if (Mathf.Abs(Boss.Body.position.x - endX) > 0.4f) yield return Boss.LeapTo(endX, leapHeight);
             int dir = -side;
 
+            // The top vertex gathers the power for the bolt.
             if (Boss.Enraged)
             {
+                Boss.Shape.SetCornerGlow(0, 0.8f, bolt.color);
                 if (Boss.CameraFollow != null) Boss.CameraFollow.Shake(0.12f, rageTime);
                 yield return Boss.Tremble(rageTime, 0.12f);
             }
             else
             {
-                yield return new WaitForSeconds(0.15f);
+                for (float t = 0f; t < 0.25f; t += Time.deltaTime)
+                {
+                    Boss.Shape.SetCornerGlow(0, t / 0.25f, bolt.color);
+                    yield return null;
+                }
             }
 
             // Work out when the roll will have passed the circle, so the bolt can arrive just as the circle lands
@@ -95,18 +104,24 @@ namespace ProjectCircle.Enemies.Boss
             if (Boss.Enraged) FireBolt(dir, arrive + secondBoltGap);
 
             // Rock back on the rear corner, then go: the readable beat before the roll.
+            // (The top vertex flashes white as the bolt leaves it, then cools.)
             for (float t = 0f; t < beforeRoll; t += Time.deltaTime)
             {
                 Boss.SetPivotPose(-dir, 12f * Mathf.Sin(t / beforeRoll * Mathf.PI));
+                float p = t / beforeRoll;
+                Boss.Shape.SetCornerGlow(0, 1f - p * 0.6f, Color.Lerp(Color.white, bolt.color, p * 3f));
                 yield return null;
             }
             Boss.ResetPose();
 
+            // Rolling on power: every vertex burns as it rolls over them.
+            Boss.Shape.SetCornerGlow(RoundedTriangleMesh.AllCorners, 0.55f, rollGlow);
             while (Boss.CanStepTo(dir))
             {
                 yield return Boss.TumbleStep(dir, step, hurts: true);
                 if (Boss.CameraFollow != null) Boss.CameraFollow.Shake(0.07f, 0.1f);
             }
+            Boss.Shape.SetCornerGlow(-1, 0f, rollGlow);
             if (Boss.CameraFollow != null) Boss.CameraFollow.Shake(0.3f, 0.3f);
         }
 
@@ -140,7 +155,9 @@ namespace ProjectCircle.Enemies.Boss
 
         public override void Cancel()
         {
-            if (Boss != null) Boss.ResetPose();
+            if (Boss == null) return;
+            Boss.ResetPose();
+            if (Boss.Shape != null) Boss.Shape.SetCornerGlow(-1, 0f, rollGlow);
         }
     }
 }

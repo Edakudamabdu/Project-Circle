@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17272073cbcc03d4b82d101449fb470b, type: 3}
+  m_Name: SquaresRefuge_TheSquare_First
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Systems.Dialogue
+  speaker: The Square
+  lines:
+  - You came up from the bottom... a shape with no corners at all.
+  - Down there they'd call that nothing. Up here, they'd call it a mistake.
+  - I left my tier the night they measured my sister. Four sides, and still not enough
+    for them.
+  - The thing in the vertices can't see in here. I made sure of it. Rest if you need
+    to.

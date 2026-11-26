@@ -91,7 +91,6 @@ namespace ProjectCircle.Player
 
         /// <summary>True while the jump button is held down.</summary>
         public bool JumpHeld => !ControlsLocked && jumpAction != null && jumpAction.action.IsPressed();
-
         private void OnEnable()
         {
             heal = healAction != null ? healAction.action : InputSystem.actions?.FindAction("Player/Heal");

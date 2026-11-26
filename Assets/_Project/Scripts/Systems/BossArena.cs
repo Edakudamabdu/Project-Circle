@@ -37,6 +37,19 @@ namespace ProjectCircle.Systems
         [Tooltip("Shown when the boss is beaten.")]
         [SerializeField] private string defeatedText = "Base Warden defeated";
 
+        [Header("Reward (kept in GameProgress)")]
+        [Tooltip("Story flags set when the boss is beaten. The first one also marks the boss as beaten for good " +
+                 "(coming back later, the arena is empty and open).")]
+        [SerializeField] private string[] rewardFlags = { "Seal.Warden" };
+
+        [Tooltip("Cape strings given when the boss is beaten (the freed Slums lift the circle up: double jump).")]
+        [SerializeField] private PlayerAbility rewardAbilities = PlayerAbility.AirJump;
+
+        [Tooltip("Shown after the defeat text, e.g. the new string.")]
+        [SerializeField] private string rewardText = "A string of the discarded lifts you higher";
+
+        [SerializeField] private string rewardHint = "Jump again in the air: DOUBLE JUMP";
+
         private PlayerInputReader input;
         private PlayerHealth playerHealth;
         private CameraFollow2D cameraFollow;
@@ -65,6 +78,13 @@ namespace ProjectCircle.Systems
             entryTrigger.Entered += () => StartCoroutine(BeginFight());
             boss.Defeated += () => StartCoroutine(EndFight());
             playerHealth.Respawned += HandlePlayerRespawned;
+
+            // Already beaten on this run: the arena is empty and stays open.
+            if (rewardFlags != null && rewardFlags.Length > 0 && GameProgress.Has(rewardFlags[0]))
+            {
+                won = true;
+                boss.gameObject.SetActive(false);
+            }
         }
 
         private IEnumerator BeginFight()
@@ -94,7 +114,24 @@ namespace ProjectCircle.Systems
             yield return new WaitForSeconds(1.2f);
             CinematicOverlay.Instance.ShowAreaName(defeatedText, 2.5f);
             cameraFollow.ClearFocus();
+
+            // The reward: seal and story flags, and a new cape string.
+            if (rewardFlags != null) foreach (string f in rewardFlags) GameProgress.Set(f);
+            if (rewardAbilities != PlayerAbility.None)
+            {
+                var abilities = playerHealth.GetComponent<PlayerAbilities>();
+                if (abilities != null) abilities.Grant(rewardAbilities);
+            }
             yield return MoveGates(close: false);
+
+            if (!string.IsNullOrEmpty(rewardText))
+            {
+                yield return new WaitForSeconds(2.6f);
+                Vector2 at = playerHealth.transform.position;
+                Fx.LightColumn(at + Vector2.down * 0.5f, 7f, new Color(0.86f, 0.25f, 0.22f, 1f), 1.1f, 1.6f);
+                CinematicOverlay.Instance.ShowAreaName(rewardText.ToUpperInvariant(), 2.5f);
+                if (!string.IsNullOrEmpty(rewardHint)) CinematicOverlay.Instance.ShowHint(rewardHint, 4f);
+            }
         }
 
         private void HandlePlayerRespawned()

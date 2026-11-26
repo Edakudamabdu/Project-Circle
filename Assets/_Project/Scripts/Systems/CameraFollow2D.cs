@@ -77,6 +77,9 @@ namespace ProjectCircle.Systems
         private float shakeDuration;
         private float shakeStartTime = float.NegativeInfinity;
 
+        // Optional room limits (exit openings): the view stops there instead of showing past them.
+        private CameraBounds2D bounds;
+
         /// <summary>
         /// Shakes the camera. <paramref name="strength"/> is the maximum offset in world units; it fades out
         /// over <paramref name="duration"/> seconds of real time. A stronger shake replaces a weaker one.
@@ -181,6 +184,8 @@ namespace ProjectCircle.Systems
                 target.position.x + currentLookAhead + offset.x,
                 focusY + offset.y,
                 transform.position.z);
+            followPosition.x = ClampX(followPosition.x);
+            followPosition.y = ClampY(followPosition.y);
             transform.position = followPosition;
         }
 
@@ -188,6 +193,7 @@ namespace ProjectCircle.Systems
         {
             followPosition = transform.position;
             cam = GetComponent<Camera>();
+            bounds = FindAnyObjectByType<CameraBounds2D>();
             defaultOrthographicSize = cam != null ? cam.orthographicSize : 6f;
             zoomTarget = zoomSize = defaultOrthographicSize;
 
@@ -232,16 +238,37 @@ namespace ProjectCircle.Systems
                 UpdateFallOffset(targetVelocity.y, dt);
 
                 float desiredX = targetPos.x + currentLookAhead + offset.x;
-                float desiredY = focusY + offset.y + currentFallOffset;
+                // Shaft/hole zones cap the target height; the smoothing eases the camera onto the cap.
+                float desiredY = ClampY(focusY + offset.y + currentFallOffset);
 
                 followPosition.x = Mathf.SmoothDamp(followPosition.x, desiredX, ref velocityX, horizontalSmoothTime, Mathf.Infinity, dt);
                 followPosition.y = Mathf.SmoothDamp(followPosition.y, desiredY, ref velocityY, verticalSmoothTime, Mathf.Infinity, dt);
+
+                // Hold at the room's limits (a hard stop, so nothing past an exit opening ever shows).
+                float clamped = ClampX(followPosition.x);
+                if (!Mathf.Approximately(clamped, followPosition.x)) { followPosition.x = clamped; velocityX = 0f; }
             }
 
             // Shake on top of the follow position.
             float strength = CurrentShakeStrength();
             Vector2 shake = strength > 0f ? Random.insideUnitCircle * strength : Vector2.zero;
             transform.position = followPosition + (Vector3)shake;
+        }
+
+        /// <summary>Clamps a camera centre x to the scene's <see cref="CameraBounds2D"/>, if it has one.</summary>
+        private float ClampX(float x)
+        {
+            if (bounds == null) return x;
+            float halfWidth = cam != null && cam.orthographic ? cam.orthographicSize * cam.aspect : 0f;
+            return bounds.ClampCentreX(x, halfWidth);
+        }
+
+        /// <summary>Clamps a camera centre y to any <see cref="CameraLimitZone"/> the target is inside.</summary>
+        private float ClampY(float y)
+        {
+            if (target == null) return y;
+            float halfHeight = cam != null && cam.orthographic ? cam.orthographicSize : 0f;
+            return CameraLimitZone.ClampCentreY(y, target.position, halfHeight);
         }
 
         private void UpdateLookAhead(float velocityXTarget, float dt)

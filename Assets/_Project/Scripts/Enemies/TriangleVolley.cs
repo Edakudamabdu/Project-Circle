@@ -81,6 +81,7 @@ namespace ProjectCircle.Enemies
             enemy = GetComponent<TriangleEnemy>();
             body = GetComponent<Rigidbody2D>();
             health = GetComponent<EnemyHealth>();
+            orbs.color = TriangleKinds.Tint(orbs.color, TriangleKinds.HueShiftOf(this)); // orbs in its owner's colour
         }
 
         private void OnEnable()
@@ -196,6 +197,7 @@ namespace ProjectCircle.Enemies
                     orb.Release((Vector2)orb.transform.position - centre);
                 }
                 forming.Clear();
+                ClearCornerGlow();
             }
 
             if (PhaseTime < hangTime) return;
@@ -228,7 +230,7 @@ namespace ProjectCircle.Enemies
         private void Finish()
         {
             phase = Phase.Ready;
-            nextAttackTime = Time.time + cooldown;
+            nextAttackTime = Time.time + cooldown / Mathf.Max(0.1f, enemy.EffectiveHaste); // an Overseer makes it attack more often
             if (enemy != null) enemy.EndAttack();
         }
 
@@ -240,12 +242,13 @@ namespace ProjectCircle.Enemies
                 if (orb != null) orb.Cancel();
             }
             forming.Clear();
+            ClearCornerGlow();
 
             if (phase == Phase.Release) body.gravityScale = savedGravityScale;
 
             bool wasLocked = enemy != null && enemy.IsAttackLocked;
             phase = Phase.Ready;
-            nextAttackTime = Time.time + cooldown * 0.5f;
+            nextAttackTime = Time.time + cooldown * 0.5f / Mathf.Max(0.1f, enemy.EffectiveHaste);
             if (wasLocked) enemy.EndAttack();
         }
 
@@ -259,6 +262,13 @@ namespace ProjectCircle.Enemies
             {
                 if (forming[c] != null) forming[c].SetForming(CornerPosition(c), progress);
             }
+            // The vertices the orbs grow on glow with the power being drawn out of them.
+            if (enemy.Shape != null) enemy.Shape.SetCornerGlow(RoundedTriangleMesh.AllCorners, progress, orbs.color);
+        }
+
+        private void ClearCornerGlow()
+        {
+            if (enemy != null && enemy.Shape != null) enemy.Shape.SetCornerGlow(-1, 0f, orbs.color);
         }
 
         /// <summary>World position just outside the tip of a corner.</summary>

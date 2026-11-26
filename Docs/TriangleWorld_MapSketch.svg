@@ -7,12 +7,14 @@
     .subtitle { font: italic 18px Georgia, serif; fill: #6b6153; }
     .corr { stroke: #cdbfa5; stroke-width: 16; fill: none; stroke-linecap: round; stroke-linejoin: round; }
     .corr-hidden { stroke: #cdbfa5; stroke-width: 10; fill: none; stroke-dasharray: 10 9; stroke-linecap: round; }
+    .corr-fall { stroke: #b9a98c; stroke-width: 4; fill: none; stroke-dasharray: 4 8; stroke-linecap: round; }
     .room { stroke: #4a4036; stroke-width: 2.5; }
     .boss { stroke: #a8322a; stroke-width: 5; }
     .final { stroke: #6e1414; stroke-width: 7; }
-    .arena { stroke: #cf7222; stroke-width: 5; }
     .hidden { stroke: #4a4036; stroke-width: 2.5; stroke-dasharray: 9 7; }
     .temple { stroke: #a07818; stroke-width: 5; }
+    .strings { stroke: #b8322c; stroke-width: 5; }
+    .gatebox { stroke: #2b2620; stroke-width: 3.5; }
     .name { font: 700 19px 'Segoe UI', Arial, sans-serif; fill: #2b2620; }
     .sub { font: italic 14px 'Segoe UI', Arial, sans-serif; fill: #5d5246; }
     .tag { font: 700 13px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
@@ -27,63 +29,72 @@
 
   <!-- Title -->
   <text class="title" x="60" y="62">Triangle World — Map Sketch</text>
-  <text class="subtitle" x="62" y="92">Project Circle · level layout proposal v0.1 · schematic, not to scale · every name and boss below is a proposal</text>
+  <text class="subtitle" x="62" y="92">Project Circle · level layout proposal v0.3 · follows the story flow · schematic, not to scale · names and bosses are proposals</text>
 
   <!-- ===================== STRATA (the vertex hierarchy, made physical: rank rises with height) ===================== -->
   <g transform="translate(0,40)">
     <rect class="band" x="40" y="70" width="1780" height="420" rx="18" opacity="0.55"/>
     <rect class="band" x="40" y="505" width="1780" height="455" rx="18" opacity="0.35"/>
     <rect class="band" x="40" y="975" width="1780" height="420" rx="18" opacity="0.55"/>
-    <text class="bandlbl" x="1800" y="380" text-anchor="end">UPPER STRATUM — THE "PERFECT"</text>
+    <text class="bandlbl" x="1800" y="300" text-anchor="end">UPPER STRATUM — THE "PERFECT"</text>
     <text class="bandlbl" x="1800" y="942" text-anchor="end">MIDDLE STRATUM — THE RANKED</text>
     <text class="bandlbl" x="1800" y="1377" text-anchor="end">LOWER STRATUM — THE DISCARDED</text>
 
     <!-- ===================== CORRIDORS (drawn under rooms) ===================== -->
-    <!-- Lowlands -->
-    <path class="corr" d="M340,1265 L400,1265"/>                         <!-- Discard Pit - Graveyard -->
-    <path class="corr" d="M300,1180 L300,1090 L380,1090"/>               <!-- Discard Pit - Old Triangle's Hollow -->
-    <path class="corr" d="M185,1180 L185,1105"/>                         <!-- Discard Pit - Shrine (M gate) -->
-    <path class="corr" d="M620,1090 L690,1090"/>                         <!-- Hollow - Slums -->
-    <path class="corr" d="M680,1272 L760,1272 L760,1160"/>               <!-- Graveyard - Slums -->
-    <!-- Slums up to the Warden, the Terraces and the Rank Gate -->
+    <!-- Lowlands: the opening and the story path -->
+    <path class="corr-fall" d="M185,1120 L185,1220"/>                    <!-- Outskirts - Pit (thrown down: the blackout) -->
+    <path class="corr" d="M320,1280 L380,1280"/>                         <!-- Pit - Old Triangle's Hollow -->
+    <path class="corr" d="M500,1220 L500,1150"/>                         <!-- Hollow - Hall of Strings (the gateway he opens) -->
+    <path class="corr" d="M620,1090 L650,1090 L650,1287 L680,1287"/>     <!-- Hall of Strings - Graveyard -->
+    <path class="corr" d="M840,1230 L840,1160"/>                         <!-- Graveyard - Slums -->
+    <path class="corr-hidden" d="M960,1290 L1030,1290"/>                 <!-- Graveyard - Shrine (secret, M gate) -->
+    <!-- Slums up to the Warden and the Terraces -->
     <path class="corr" d="M830,990 L830,930"/>                           <!-- Slums - Base Warden -->
     <path class="corr" d="M720,850 L690,850 L690,640 L660,640"/>         <!-- Warden - Terraces -->
-    <path class="corr" d="M838,800 L838,690"/>                           <!-- Warden - Rank Gate -->
-    <path class="corr" d="M845,600 L845,540"/>                           <!-- Rank Gate - Spire (3 seals) -->
     <!-- Terraces -->
     <path class="corr" d="M300,575 L270,575"/>                           <!-- Terraces - Twin Isosceles -->
-    <path class="corr" d="M450,690 L450,745"/>                           <!-- Terraces - Proving Ring (P gate) -->
-    <path class="corr" d="M495,480 L495,400"/>                           <!-- Terraces - Shatter Grounds -->
-    <path class="corr-hidden" d="M360,320 L310,320"/>                    <!-- Shatter Grounds - Square's Refuge (hidden, J gate) -->
+    <path class="corr-hidden" d="M195,375 L195,440 L330,440 L330,480"/>  <!-- Terraces - Square's Refuge (hidden, J gate) -->
+    <!-- Fissure side, Rank Gate, Prism -->
+    <path class="corr" d="M990,1060 L1030,1060"/>                        <!-- Slums - Fissure (D gate) -->
+    <path class="corr" d="M1130,760 L1130,630"/>                         <!-- Fissure - Rank Gate - Prism Caverns -->
+    <path class="corr" d="M1230,1050 L1300,1050"/>                       <!-- Fissure - Hall of Measure -->
+    <path class="corr" d="M1490,505 L1540,505"/>                         <!-- Prism - Refractor -->
     <!-- Upper -->
+    <path class="corr" d="M660,510 L720,510"/>                           <!-- Terraces - Equilateral Spire (Seals I + II) -->
     <path class="corr" d="M870,300 L870,240"/>                           <!-- Spire - Apex Throne -->
     <path class="corr" d="M1000,155 L1080,155"/>                         <!-- Apex Throne - Temple -->
     <path class="corr" d="M1400,150 L1470,150"/>                         <!-- Temple - Road (opens after the Mould) -->
-    <!-- Fissure side -->
-    <path class="corr" d="M990,1060 L1030,1060"/>                        <!-- Slums - Fissure (D gate) -->
-    <path class="corr" d="M1130,760 L1130,680"/>                         <!-- Fissure - Prism Caverns -->
-    <path class="corr" d="M1230,1050 L1300,1050"/>                       <!-- Fissure - Hall of Measure -->
-    <path class="corr" d="M1490,555 L1540,555"/>                         <!-- Prism - Refractor -->
 
     <!-- ===================== ROOMS ===================== -->
     <!-- LOWER STRATUM -->
-    <rect class="room" x="70" y="1180" width="270" height="140" rx="16" fill="#e2d7c4"/>
-    <text class="name" x="88" y="1240">The Discard Pit</text>
-    <text class="sub" x="88" y="1262">where unwanted shapes are thrown</text>
-    <text class="sub" x="88" y="1282">START · tutorial</text>
+    <rect class="room" x="70" y="1010" width="240" height="110" rx="16" fill="#dfe4da"/>
+    <text class="name" x="88" y="1050">The Outskirts</text>
+    <text class="sub" x="88" y="1072">just outside Triangle World</text>
+    <text class="sub" x="88" y="1092">the circle's home · START</text>
 
-    <rect class="hidden" x="90" y="1010" width="190" height="95" rx="14" fill="#efe7d8"/>
-    <text class="name" x="104" y="1050" style="font-size:16px">Shrine of the</text>
-    <text class="name" x="104" y="1070" style="font-size:16px">First Break</text>
-    <text class="sub" x="104" y="1092">secret · lore</text>
+    <rect class="room" x="70" y="1220" width="250" height="120" rx="16" fill="#e2d7c4"/>
+    <text class="name" x="88" y="1262">The Discard Pit</text>
+    <text class="sub" x="88" y="1284">where unwanted shapes are thrown</text>
+    <text class="sub" x="88" y="1304">wakes here · movement only</text>
 
-    <rect class="room" x="400" y="1215" width="280" height="115" rx="16" fill="#e2d7c4"/>
-    <text class="name" x="418" y="1258">Broken Vertex Graveyard</text>
-    <text class="sub" x="418" y="1280">snapped corners of the cast-out</text>
+    <rect class="room" x="380" y="1220" width="240" height="120" rx="16" fill="#e2d7c4"/>
+    <text class="name" x="398" y="1262">Old Triangle's Hollow</text>
+    <text class="sub" x="398" y="1284">his shack at the edge</text>
 
-    <rect class="room" x="380" y="1030" width="240" height="120" rx="16" fill="#e2d7c4"/>
-    <text class="name" x="398" y="1072">Old Triangle's Hollow</text>
-    <text class="sub" x="398" y="1094">his shack at the edge</text>
+    <rect class="strings" x="380" y="1030" width="240" height="120" rx="16" fill="#f2dcd6"/>
+    <text class="name" x="398" y="1070">Hall of Strings</text>
+    <text class="sub" x="398" y="1092">the resistance of the cast-out</text>
+    <text class="sub" x="398" y="1112">the strings become the CAPE</text>
+
+    <rect class="room" x="680" y="1230" width="280" height="115" rx="16" fill="#e2d7c4"/>
+    <text class="name" x="698" y="1272">Broken Vertex Graveyard</text>
+    <text class="sub" x="698" y="1294">snapped corners of the cast-out</text>
+    <text class="sub" x="698" y="1314">first fights with the cape</text>
+
+    <rect class="hidden" x="1030" y="1245" width="200" height="95" rx="14" fill="#efe7d8"/>
+    <text class="name" x="1044" y="1284" style="font-size:16px">Shrine of the</text>
+    <text class="name" x="1044" y="1304" style="font-size:16px">First Break</text>
+    <text class="sub" x="1044" y="1326">secret · lore</text>
 
     <rect class="room" x="690" y="990" width="300" height="170" rx="16" fill="#ecd6aa"/>
     <text class="name" x="708" y="1040">Scalene Slums</text>
@@ -108,44 +119,37 @@
     <text class="name" x="738" y="845">The Base Warden</text>
     <text class="sub" x="738" y="867">keeps the low ranks below</text>
 
-    <rect class="room" x="770" y="600" width="150" height="90" rx="14" fill="#f3e9c6"/>
-    <text class="name" x="788" y="640">Rank Gate</text>
-    <text class="sub" x="788" y="662">needs 3 vertices</text>
+    <rect class="hidden" x="1040" y="650" width="190" height="90" rx="14" fill="#f3e9c6"/>
+    <text class="name" x="1056" y="682">Rank Gate</text>
+    <text class="sub" x="1056" y="702">lets only triangles through</text>
+    <text class="sub" x="1056" y="722">come back with the Mould</text>
 
     <rect class="room" x="300" y="480" width="360" height="210" rx="16" fill="#f1e5c0"/>
     <text class="name" x="318" y="530">Isosceles Terraces</text>
     <text class="sub" x="318" y="552">middle-rank tiers, climbing up</text>
-    <text class="sub" x="318" y="572">chasers and orb casters</text>
+    <text class="sub" x="318" y="572">chargers under an Overseer</text>
 
     <rect class="boss" x="90" y="505" width="180" height="140" rx="16" fill="#efd9cf"/>
     <text class="name" x="106" y="555">The Twin</text>
     <text class="name" x="106" y="577">Isosceles</text>
     <text class="sub" x="106" y="600">duo fight</text>
 
-    <rect class="arena" x="330" y="745" width="240" height="140" rx="16" fill="#f4e0c8"/>
-    <text class="name" x="348" y="795">The Proving Ring</text>
-    <text class="sub" x="348" y="817">triangles fight for rank</text>
-    <text class="sub" x="348" y="837">ARENA A · waves</text>
+    <rect class="hidden" x="1110" y="380" width="380" height="250" rx="16" fill="#dcd4ef"/>
+    <text class="name" x="1128" y="430">Prism Caverns</text>
+    <text class="sub" x="1128" y="452">light-bending crystal caves</text>
+    <text class="sub" x="1128" y="472">refracted lasers, ceiling sentries</text>
+    <text class="sub" x="1128" y="502">OPTIONAL · after the Triangle Mould</text>
 
-    <rect class="room" x="1110" y="430" width="380" height="250" rx="16" fill="#dcd4ef"/>
-    <text class="name" x="1128" y="480">Prism Caverns</text>
-    <text class="sub" x="1128" y="502">light-bending crystal caves</text>
-    <text class="sub" x="1128" y="522">refracted lasers, orb casters</text>
-
-    <rect class="boss" x="1540" y="460" width="230" height="170" rx="16" fill="#efd9cf"/>
-    <text class="name" x="1558" y="510">The Refractor</text>
-    <text class="sub" x="1558" y="532">splits into homing orbs</text>
+    <rect class="boss" x="1540" y="410" width="230" height="170" rx="16" fill="#efd9cf" stroke-dasharray="12 7"/>
+    <text class="name" x="1558" y="460">The Refractor</text>
+    <text class="sub" x="1558" y="482">splits into homing orbs</text>
+    <text class="sub" x="1558" y="502">optional boss · late reward</text>
 
     <!-- UPPER STRATUM -->
     <rect class="hidden" x="80" y="265" width="230" height="110" rx="14" fill="#e3e8ef"/>
     <text class="name" x="96" y="305">Square's Refuge</text>
     <text class="sub" x="96" y="327">hidden from the Shapeshifter</text>
     <text class="sub" x="96" y="347">ally · secret</text>
-
-    <rect class="arena" x="360" y="250" width="270" height="150" rx="16" fill="#f4e0c8"/>
-    <text class="name" x="378" y="300">The Shatter Grounds</text>
-    <text class="sub" x="378" y="322">gauntlet of the elite</text>
-    <text class="sub" x="378" y="342">ARENA B · hard waves</text>
 
     <rect class="room" x="720" y="300" width="260" height="240" rx="16" fill="#f6edc9"/>
     <text class="name" x="738" y="350">Equilateral Spire</text>
@@ -169,35 +173,41 @@
     <!-- ===================== MARKERS ===================== -->
     <!-- Critical path numbers -->
     <g>
-      <circle cx="70" cy="1180" r="17" fill="#2b2620"/><text class="tag" x="70" y="1185" text-anchor="middle">1</text>
-      <circle cx="380" cy="1030" r="17" fill="#2b2620"/><text class="tag" x="380" y="1035" text-anchor="middle">2</text>
-      <circle cx="690" cy="990" r="17" fill="#2b2620"/><text class="tag" x="690" y="995" text-anchor="middle">3</text>
-      <circle cx="720" cy="800" r="17" fill="#2b2620"/><text class="tag" x="720" y="805" text-anchor="middle">4</text>
-      <circle cx="300" cy="480" r="17" fill="#2b2620"/><text class="tag" x="300" y="485" text-anchor="middle">5</text>
-      <circle cx="90" cy="505" r="17" fill="#2b2620"/><text class="tag" x="90" y="510" text-anchor="middle">6</text>
-      <circle cx="1030" cy="760" r="17" fill="#2b2620"/><text class="tag" x="1030" y="765" text-anchor="middle">7</text>
-      <circle cx="1110" cy="430" r="17" fill="#2b2620"/><text class="tag" x="1110" y="435" text-anchor="middle">8</text>
-      <circle cx="1540" cy="460" r="17" fill="#2b2620"/><text class="tag" x="1540" y="465" text-anchor="middle">9</text>
-      <circle cx="770" cy="600" r="17" fill="#2b2620"/><text class="tag" x="770" y="605" text-anchor="middle">10</text>
-      <circle cx="720" cy="300" r="17" fill="#2b2620"/><text class="tag" x="720" y="305" text-anchor="middle">11</text>
-      <circle cx="740" cy="70" r="17" fill="#2b2620"/><text class="tag" x="740" y="75" text-anchor="middle">12</text>
-      <circle cx="1080" cy="60" r="17" fill="#2b2620"/><text class="tag" x="1080" y="65" text-anchor="middle">13</text>
-      <circle cx="1470" cy="95" r="17" fill="#2b2620"/><text class="tag" x="1470" y="100" text-anchor="middle">14</text>
+      <circle cx="70" cy="1010" r="17" fill="#2b2620"/><text class="tag" x="70" y="1015" text-anchor="middle">1</text>
+      <circle cx="70" cy="1220" r="17" fill="#2b2620"/><text class="tag" x="70" y="1225" text-anchor="middle">2</text>
+      <circle cx="380" cy="1220" r="17" fill="#2b2620"/><text class="tag" x="380" y="1225" text-anchor="middle">3</text>
+      <circle cx="380" cy="1030" r="17" fill="#2b2620"/><text class="tag" x="380" y="1035" text-anchor="middle">4</text>
+      <circle cx="680" cy="1230" r="17" fill="#2b2620"/><text class="tag" x="680" y="1235" text-anchor="middle">5</text>
+      <circle cx="690" cy="990" r="17" fill="#2b2620"/><text class="tag" x="690" y="995" text-anchor="middle">6</text>
+      <circle cx="720" cy="800" r="17" fill="#2b2620"/><text class="tag" x="720" y="805" text-anchor="middle">7</text>
+      <circle cx="300" cy="480" r="17" fill="#2b2620"/><text class="tag" x="300" y="485" text-anchor="middle">8</text>
+      <circle cx="90" cy="505" r="17" fill="#2b2620"/><text class="tag" x="90" y="510" text-anchor="middle">9</text>
+      <circle cx="720" cy="300" r="17" fill="#2b2620"/><text class="tag" x="720" y="305" text-anchor="middle">10</text>
+      <circle cx="740" cy="70" r="17" fill="#2b2620"/><text class="tag" x="740" y="75" text-anchor="middle">11</text>
+      <circle cx="1080" cy="60" r="17" fill="#2b2620"/><text class="tag" x="1080" y="65" text-anchor="middle">12</text>
+      <circle cx="1470" cy="95" r="17" fill="#2b2620"/><text class="tag" x="1470" y="100" text-anchor="middle">13</text>
+    </g>
+
+    <!-- Cape strings: where each ability joins the cape -->
+    <g>
+      <rect x="698" y="1318" width="88" height="22" rx="11" fill="#b8322c"/><text class="tag" x="742" y="1334" text-anchor="middle">+ DASH</text>
+      <rect x="862" y="1000" width="98" height="24" rx="12" fill="#b8322c"/><text class="tag" x="911" y="1017" text-anchor="middle">+ PARRY</text>
+      <rect x="733" y="885" width="150" height="24" rx="12" fill="#b8322c"/><text class="tag" x="808" y="902" text-anchor="middle">→ + DOUBLE JUMP</text>
+      <rect x="398" y="1120" width="80" height="24" rx="12" fill="#b8322c"/><text class="tag" x="438" y="1137" text-anchor="middle">+ BLADE</text>
     </g>
 
     <!-- Boss badges -->
     <g>
       <path d="M915,812 l14,22 h-28 z" fill="#a8322a"/><text class="tag" x="915" y="831" text-anchor="middle" style="font-size:10px">B1</text>
       <path d="M245,517 l14,22 h-28 z" fill="#a8322a"/><text class="tag" x="245" y="536" text-anchor="middle" style="font-size:10px">B2</text>
-      <path d="M1745,472 l14,22 h-28 z" fill="#a8322a"/><text class="tag" x="1745" y="491" text-anchor="middle" style="font-size:10px">B3</text>
+      <path d="M1745,422 l14,22 h-28 z" fill="#a8322a"/><text class="tag" x="1745" y="441" text-anchor="middle" style="font-size:10px">B3</text>
       <!-- Final: crown -->
       <path d="M955,90 l8,16 l9,-12 l9,12 l8,-16 v26 h-34 z" fill="#6e1414"/>
     </g>
 
-    <!-- Arena badges -->
-    <g>
-      <circle cx="545" cy="770" r="15" fill="#cf7222"/><path d="M537,762 l16,16 M553,762 l-16,16" stroke="#fff" stroke-width="3"/>
-      <circle cx="605" cy="275" r="15" fill="#cf7222"/><path d="M597,267 l16,16 M613,267 l-16,16" stroke="#fff" stroke-width="3"/>
+    <!-- The cape (Hall of Strings): three hanging strings -->
+    <g stroke="#b8322c" stroke-width="3" stroke-linecap="round">
+      <path d="M570,1040 q-4,20 0,40"/><path d="M584,1040 q4,26 0,52"/><path d="M598,1040 q-4,16 0,32"/>
     </g>
 
     <!-- Mould -->
@@ -205,39 +215,41 @@
 
     <!-- Mirrors (checkpoints) -->
     <g fill="#d7e5f5" stroke="#a6823c" stroke-width="3">
-      <ellipse cx="595" cy="1125" rx="9" ry="14"/>   <!-- Old Triangle's Hollow -->
+      <ellipse cx="595" cy="1315" rx="9" ry="14"/>   <!-- Old Triangle's Hollow -->
       <ellipse cx="965" cy="1135" rx="9" ry="14"/>   <!-- Scalene Slums -->
       <ellipse cx="635" cy="665" rx="9" ry="14"/>    <!-- Isosceles Terraces -->
-      <ellipse cx="1465" cy="655" rx="9" ry="14"/>   <!-- Prism Caverns -->
+      <ellipse cx="1465" cy="605" rx="9" ry="14"/>   <!-- Prism Caverns -->
       <ellipse cx="1595" cy="1105" rx="9" ry="14"/>  <!-- Hall of Measure -->
       <ellipse cx="955" cy="515" rx="9" ry="14"/>    <!-- Equilateral Spire -->
       <ellipse cx="285" cy="350" rx="9" ry="14"/>    <!-- Square's Refuge -->
     </g>
 
-    <!-- NPCs -->
+    <!-- NPCs and story beats -->
     <g>
-      <circle cx="555" cy="1125" r="13" fill="#3d6fa8"/><text class="tag" x="555" y="1130" text-anchor="middle" style="font-size:10px">NPC</text>
+      <circle cx="555" cy="1315" r="13" fill="#3d6fa8"/><text class="tag" x="555" y="1320" text-anchor="middle" style="font-size:10px">NPC</text>
       <circle cx="245" cy="350" r="13" fill="#3d6fa8"/><text class="tag" x="245" y="355" text-anchor="middle" style="font-size:10px">NPC</text>
       <circle cx="925" cy="1135" r="13" fill="#3d6fa8"/><text class="tag" x="925" y="1140" text-anchor="middle" style="font-size:10px">NPC</text>
       <circle cx="1555" cy="1105" r="13" fill="#3d6fa8"/><text class="tag" x="1555" y="1110" text-anchor="middle" style="font-size:10px">NPC</text>
+      <circle cx="285" cy="1095" r="13" fill="#7a3fa8"/><text class="tag" x="285" y="1100" text-anchor="middle" style="font-size:10px">!</text>
+      <circle cx="595" cy="1125" r="13" fill="#7a3fa8"/><text class="tag" x="595" y="1130" text-anchor="middle" style="font-size:10px">!</text>
       <circle cx="1205" cy="1065" r="13" fill="#7a3fa8"/><text class="tag" x="1205" y="1070" text-anchor="middle" style="font-size:10px">!</text>
     </g>
 
     <!-- Lore markers -->
     <g fill="#8a6a44">
-      <rect x="648" y="1295" width="18" height="18" rx="3"/>
-      <rect x="250" y="1080" width="18" height="18" rx="3"/>
+      <rect x="928" y="1310" width="18" height="18" rx="3"/>
+      <rect x="1200" y="1310" width="18" height="18" rx="3"/>
       <rect x="1590" y="995" width="18" height="18" rx="3"/>
       <rect x="1195" y="775" width="18" height="18" rx="3"/>
     </g>
 
     <!-- Gates on corridors -->
     <g>
-      <rect x="166" y="1128" width="38" height="26" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="185" y="1146" text-anchor="middle">M</text>
-      <rect x="431" y="704" width="38" height="26" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="450" y="722" text-anchor="middle">P</text>
-      <rect x="316" y="307" width="38" height="26" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="335" y="325" text-anchor="middle">J</text>
+      <rect x="976" y="1277" width="38" height="26" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="995" y="1295" text-anchor="middle">M</text>
+      <rect x="243" y="427" width="38" height="26" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="262" y="445" text-anchor="middle">J</text>
       <rect x="991" y="1047" width="38" height="26" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="1010" y="1065" text-anchor="middle">D</text>
-      <rect x="809" y="557" width="72" height="28" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="845" y="576" text-anchor="middle">◆◆◆</text>
+      <rect x="664" y="496" width="52" height="28" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="690" y="515" text-anchor="middle">◆◆</text>
+      <rect x="1111" y="738" width="38" height="26" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="1130" y="756" text-anchor="middle">M</text>
       <rect x="1416" y="137" width="38" height="26" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><path d="M1435,141 l9,15 h-18 z" fill="#c8961e"/>
     </g>
   </g>
@@ -248,80 +260,77 @@
     <circle cx="14" cy="32" r="13" fill="#2b2620"/><text class="tag" x="14" y="37" text-anchor="middle">1</text><text class="note" x="36" y="37">critical path order</text>
     <path d="M14,58 l14,22 h-28 z" fill="#a8322a"/><text class="note" x="36" y="77">boss arena (red border)</text>
     <path d="M2,100 l7,14 l8,-10 l8,10 l7,-14 v22 h-30 z" fill="#6e1414"/><text class="note" x="36" y="118">final boss</text>
-    <circle cx="276" cy="32" r="13" fill="#cf7222"/><path d="M269,25 l14,14 M283,25 l-14,14" stroke="#fff" stroke-width="3"/><text class="note" x="298" y="37">combat arena (orange border)</text>
-    <ellipse cx="276" cy="72" rx="9" ry="14" fill="#d7e5f5" stroke="#a6823c" stroke-width="3"/><text class="note" x="298" y="77">Mirror (checkpoint · rest · reflect)</text>
-    <circle cx="276" cy="112" r="12" fill="#3d6fa8"/><text class="note" x="298" y="118">NPC   </text>
-    <circle cx="350" cy="112" r="12" fill="#7a3fa8"/><text class="note" x="370" y="118">story beat</text>
+    <ellipse cx="276" cy="32" rx="9" ry="14" fill="#d7e5f5" stroke="#a6823c" stroke-width="3"/><text class="note" x="298" y="37">Mirror (checkpoint · rest · reflect)</text>
+    <circle cx="276" cy="72" r="12" fill="#3d6fa8"/><text class="note" x="298" y="77">NPC</text>
+    <circle cx="350" cy="72" r="12" fill="#7a3fa8"/><text class="note" x="370" y="77">story beat</text>
+    <rect x="252" y="102" width="60" height="22" rx="11" fill="#b8322c"/><text class="tag" x="282" y="118" text-anchor="middle">+ ...</text><text class="note" x="322" y="118">a cape string: new ability</text>
     <rect x="600" y="22" width="18" height="18" rx="3" fill="#8a6a44"/><text class="note" x="630" y="37">lore point (tablets, murals)</text>
-    <rect x="596" y="58" width="28" height="22" rx="5" fill="#efe7d8" stroke="#4a4036" stroke-width="2.5" stroke-dasharray="7 5"/><text class="note" x="630" y="77">hidden / secret area</text>
+    <rect x="596" y="58" width="28" height="22" rx="5" fill="#efe7d8" stroke="#4a4036" stroke-width="2.5" stroke-dasharray="7 5"/><text class="note" x="630" y="77">optional / secret area</text>
     <path d="M610,98 l12,20 h-24 z" fill="#c8961e"/><text class="note" x="630" y="118">the Triangle Mould</text>
-    <rect x="900" y="20" width="34" height="24" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="917" y="37" text-anchor="middle">J</text><text class="note" x="944" y="37">needs the cape-platform double jump</text>
+    <rect x="900" y="20" width="34" height="24" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="917" y="37" text-anchor="middle">J</text><text class="note" x="944" y="37">needs the double jump</text>
     <rect x="900" y="60" width="34" height="24" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="917" y="77" text-anchor="middle">D</text><text class="note" x="944" y="77">needs the dash (crumbling wall)</text>
-    <rect x="900" y="100" width="34" height="24" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="917" y="117" text-anchor="middle">P</text><text class="note" x="944" y="117">needs the pogo (spike pit)</text>
-    <rect x="1290" y="20" width="34" height="24" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="1307" y="37" text-anchor="middle">M</text><text class="note" x="1334" y="37">needs the Triangle Mould (backtracking)</text>
-    <rect x="1290" y="60" width="60" height="24" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="1320" y="77" text-anchor="middle">◆◆◆</text><text class="note" x="1360" y="77">needs all 3 Vertex Seals</text>
-    <path d="M1290,110 h34" class="corr-hidden"/><text class="note" x="1334" y="117">hidden passage</text>
+    <rect x="900" y="100" width="34" height="24" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="917" y="117" text-anchor="middle">M</text><text class="note" x="944" y="117">needs the Triangle Mould (come back later)</text>
+    <rect x="1290" y="20" width="44" height="24" rx="6" fill="#fff8e6" stroke="#2b2620" stroke-width="2"/><text class="gate" x="1312" y="37" text-anchor="middle">◆◆</text><text class="note" x="1344" y="37">needs Vertex Seals I and II</text>
+    <path d="M262,150 h30" class="corr-fall"/><text class="note" x="298" y="155">thrown down (no way back up)</text>
+    <path d="M1290,72 h34" class="corr-hidden"/><text class="note" x="1334" y="77">hidden passage</text>
   </g>
 
   <!-- ===================== NOTES COLUMN ===================== -->
   <line x1="1860" y1="120" x2="1860" y2="1600" stroke="#d6cbb7" stroke-width="2"/>
   <g transform="translate(1890,140)">
-    <text class="h2" x="0" y="0">Critical path</text>
-    <text class="note" x="0" y="34"><tspan class="noteb">1 Discard Pit</tspan> — start. Where unwanted shapes are thrown.</text>
-    <text class="note" x="20" y="54">Tutorial: move, jump, dash, cape attack.</text>
-    <text class="note" x="0" y="80"><tspan class="noteb">2 Old Triangle's Hollow</tspan> — first Mirror. The Old</text>
-    <text class="note" x="20" y="100">Triangle (broken vertex) explains the Shapeshifter.</text>
-    <text class="note" x="0" y="126"><tspan class="noteb">3 Scalene Slums</tspan> — lowest-rank village, under the</text>
-    <text class="note" x="20" y="146">whisper. The first village to free.</text>
-    <text class="note" x="0" y="172"><tspan class="noteb">4 BOSS 1 · The Base Warden</tspan> — gatekeeper who keeps</text>
-    <text class="note" x="20" y="192">the low ranks below. Lasers + slams. Vertex Seal I.</text>
-    <text class="note" x="20" y="212">Beating it frees the Slums (they become allies).</text>
-    <text class="note" x="0" y="238"><tspan class="noteb">5 Isosceles Terraces</tspan> — middle-rank tiers to climb.</text>
-    <text class="note" x="0" y="264"><tspan class="noteb">6 BOSS 2 · The Twin Isosceles</tspan> — duo: one lasers</text>
-    <text class="note" x="20" y="284">while the other pounces. Vertex Seal II.</text>
-    <text class="note" x="0" y="310"><tspan class="noteb">7 Whispering Fissure</tspan> — a crack through the strata.</text>
-    <text class="note" x="20" y="330">Dash through crumbling walls. Corruption visuals.</text>
-    <text class="note" x="0" y="356"><tspan class="noteb">8 Prism Caverns</tspan> — crystal caves, bent lasers.</text>
-    <text class="note" x="0" y="382"><tspan class="noteb">9 BOSS 3 · The Refractor</tspan> — splits into homing orbs</text>
-    <text class="note" x="20" y="402">(dodge with double jump / dash). Vertex Seal III.</text>
-    <text class="note" x="0" y="428"><tspan class="noteb">10 Rank Gate</tspan> — only opens for 3 vertices. The three</text>
-    <text class="note" x="20" y="448">Seals form a triangle for the vertex-less circle.</text>
-    <text class="note" x="0" y="474"><tspan class="noteb">11 Equilateral Spire</tspan> — home of the "perfect".</text>
-    <text class="note" x="20" y="494">Last Mirror before the throne.</text>
-    <text class="note" x="0" y="520"><tspan class="noteb">12 FINAL · The Hierarch</tspan> — most perfect triangle,</text>
-    <text class="note" x="20" y="540">wholly under the Shapeshifter. Apex Throne.</text>
-    <text class="note" x="0" y="566"><tspan class="noteb">13 Temple of Three Points</tspan> — sacred temple behind</text>
-    <text class="note" x="20" y="586">the throne. The Triangle Mould: become a triangle</text>
-    <text class="note" x="20" y="606">for a while — the Madness Bar fills.</text>
-    <text class="note" x="0" y="632"><tspan class="noteb">14 Road to the Square Realm</tspan> — exit, next world.</text>
+    <text class="h2" x="0" y="0">Critical path (story flow)</text>
+    <text class="note" x="0" y="32"><tspan class="noteb">1 The Outskirts</tspan> — start, by the circle's home. Three</text>
+    <text class="note" x="20" y="51">triangles mock it; seen from its eyes; blackout.</text>
+    <text class="note" x="0" y="75"><tspan class="noteb">2 Discard Pit</tspan> — wakes up hurt. Movement only.</text>
+    <text class="note" x="0" y="99"><tspan class="noteb">3 Old Triangle's Hollow</tspan> — first Mirror. The world</text>
+    <text class="note" x="20" y="118">shakes; he warns of the entity, opens the gateway.</text>
+    <text class="note" x="0" y="142"><tspan class="noteb">4 Hall of Strings</tspan> — the cape forms: + BLADE (and pogo).</text>
+    <text class="note" x="0" y="166"><tspan class="noteb">5 Broken Vertex Graveyard</tspan> — first fights. At the end</text>
+    <text class="note" x="20" y="185">a string joins the cape: + DASH.</text>
+    <text class="note" x="0" y="209"><tspan class="noteb">6 Scalene Slums</tspan> — corrupted village. Where they stood</text>
+    <text class="note" x="20" y="228">together: + PARRY. Mirror before the boss.</text>
+    <text class="note" x="0" y="252"><tspan class="noteb">7 BOSS 1 · The Base Warden</tspan> — Vertex Seal I and a new</text>
+    <text class="note" x="20" y="271">cape string: + DOUBLE JUMP. (Does not free the Slums.)</text>
+    <text class="note" x="0" y="295"><tspan class="noteb">8 Isosceles Terraces</tspan> — climb the middle ranks.</text>
+    <text class="note" x="0" y="319"><tspan class="noteb">9 BOSS 2 · The Twin Isosceles</tspan> — duo. Vertex Seal II.</text>
+    <text class="note" x="0" y="343"><tspan class="noteb">10 Equilateral Spire</tspan> — needs Seals I + II. Last Mirror.</text>
+    <text class="note" x="0" y="367"><tspan class="noteb">11 FINAL · The Hierarch</tspan> — Apex Throne.</text>
+    <text class="note" x="0" y="391"><tspan class="noteb">12 Temple of Three Points</tspan> — the Triangle Mould:</text>
+    <text class="note" x="20" y="410">become a triangle for a while; the Madness Bar fills.</text>
+    <text class="note" x="0" y="434"><tspan class="noteb">13 Road to the Square Realm</tspan> — exit, next world.</text>
 
-    <text class="h2" x="0" y="692">Optional &amp; lore places</text>
-    <text class="note" x="0" y="726"><tspan class="noteb">Broken Vertex Graveyard</tspan> — snapped-off corners of</text>
-    <text class="note" x="20" y="746">cast-out triangles, piled high. Lore tablets.</text>
-    <text class="note" x="0" y="772"><tspan class="noteb">Shrine of the First Break</tspan> (secret, M) — where the</text>
-    <text class="note" x="20" y="792">first triangle lost a vertex: origin of the outcast law.</text>
-    <text class="note" x="0" y="818"><tspan class="noteb">Proving Ring</tspan> (Arena A, P) — triangles fight for rank.</text>
-    <text class="note" x="20" y="838">Wave arena; entry over a spike pit (pogo).</text>
-    <text class="note" x="0" y="864"><tspan class="noteb">Shatter Grounds</tspan> (Arena B) — elite gauntlet, harder</text>
-    <text class="note" x="20" y="884">waves, best rewards.</text>
-    <text class="note" x="0" y="910"><tspan class="noteb">Square's Refuge</tspan> (hidden, J) — the Square, hidden from</text>
-    <text class="note" x="20" y="930">the Shapeshifter's awareness. Becomes an ally.</text>
-    <text class="note" x="0" y="956"><tspan class="noteb">Hall of Measure</tspan> — where triangles are measured and</text>
-    <text class="note" x="20" y="976">ranked. Bureaucrat NPC; the discrimination theme.</text>
-    <text class="note" x="0" y="1002"><tspan class="noteb">Fissure, late game</tspan> (purple !) — the Old Triangle,</text>
-    <text class="note" x="20" y="1022">now fully corrupted: story scene or fight.</text>
+    <text class="h2" x="0" y="488">Optional &amp; come-back places</text>
+    <text class="note" x="0" y="520"><tspan class="noteb">Rank Gate</tspan> (M) — lets only triangles through: return with</text>
+    <text class="note" x="20" y="539">the Mould and pass as one. Opens the Prism Caverns</text>
+    <text class="note" x="20" y="558">and the Refractor (optional boss, a late reward).</text>
+    <text class="note" x="0" y="582"><tspan class="noteb">Whispering Fissure</tspan> (D) — corruption zone; late game</text>
+    <text class="note" x="20" y="601">the Old Triangle, fully corrupted (purple !).</text>
+    <text class="note" x="0" y="625"><tspan class="noteb">Hall of Measure</tspan> — where triangles are ranked. Lore.</text>
+    <text class="note" x="0" y="649"><tspan class="noteb">Square's Refuge</tspan> (J) — the Square, hidden. Ally.</text>
+    <text class="note" x="0" y="673"><tspan class="noteb">Shrine of the First Break</tspan> (M) — under the Graveyard.</text>
 
-    <text class="h2" x="0" y="1082">Design intent</text>
-    <text class="note" x="0" y="1116">• Rank = height. The circle starts at the very bottom</text>
-    <text class="note" x="20" y="1136">and climbs the hierarchy that threw it away.</text>
-    <text class="note" x="0" y="1162">• 3 bosses → 3 Vertex Seals → Rank Gate → final boss</text>
-    <text class="note" x="20" y="1182">→ Temple and Mould → next world.</text>
-    <text class="note" x="0" y="1208">• Each freed village becomes an ally and weakens</text>
-    <text class="note" x="20" y="1228">the Shapeshifter's hold on the region.</text>
-    <text class="note" x="0" y="1254">• The Mould unlocks M gates back in the lowlands,</text>
-    <text class="note" x="20" y="1274">rewarding a return to where the journey began.</text>
-    <text class="small" x="0" y="1320">Mechanics already in the prototype: dash, cape attack</text>
-    <text class="small" x="0" y="1340">+ pogo, cape-platform double jump, Mirrors, dialogue,</text>
-    <text class="small" x="0" y="1360">laser triangle, orb-casting triangle.</text>
+    <text class="h2" x="0" y="727">Abilities and the enemies they answer</text>
+    <text class="note" x="0" y="759"><tspan class="noteb">Blade + pogo</tspan> (Hall of Strings) — chasers, Spires,</text>
+    <text class="note" x="20" y="778">Splitters, Bulwarks.</text>
+    <text class="note" x="0" y="802"><tspan class="noteb">Dash</tspan> (Graveyard) — Wedge Chargers (dash through),</text>
+    <text class="note" x="20" y="821">Swarm Shards (dash out of the dive).</text>
+    <text class="note" x="0" y="845"><tspan class="noteb">Parry</tspan> (Slums) — Ceiling Sentries, orb casters, laser</text>
+    <text class="note" x="20" y="864">triangles, the Warden's bolt.</text>
+    <text class="note" x="0" y="888"><tspan class="noteb">Double jump</tspan> (Warden) — the Overseer on its perch,</text>
+    <text class="note" x="20" y="907">flyers, the Terraces climb, the Square's Refuge.</text>
+    <text class="note" x="0" y="931">An enemy only appears after the ability that answers it.</text>
+
+    <text class="h2" x="0" y="985">Design intent</text>
+    <text class="note" x="0" y="1017">• Rank = height. The circle starts at the very bottom</text>
+    <text class="note" x="20" y="1036">and climbs the hierarchy that threw it away.</text>
+    <text class="note" x="0" y="1060">• Each string is another cast-out shape's resistance:</text>
+    <text class="note" x="20" y="1079">the cape grows as the circle gains allies.</text>
+    <text class="note" x="0" y="1103">• Each freed village becomes an ally and weakens</text>
+    <text class="note" x="20" y="1122">the Shapeshifter's hold on the region.</text>
+    <text class="note" x="0" y="1146">• The Mould opens what rank kept closed (Rank Gate,</text>
+    <text class="note" x="20" y="1165">M gates): a reason to come back to old places.</text>
+    <text class="small" x="0" y="1210">Built in the prototype: Outskirts → Pit → Hollow → Hall of</text>
+    <text class="small" x="0" y="1230">Strings (StoryTest), the Base Warden (BossArena), and all</text>
+    <text class="small" x="0" y="1250">enemy types above (EnemyTest).</text>
   </g>
 </svg>

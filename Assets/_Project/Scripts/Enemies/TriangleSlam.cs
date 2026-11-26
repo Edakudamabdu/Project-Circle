@@ -101,6 +101,13 @@ namespace ProjectCircle.Enemies
             enemy = GetComponent<TriangleEnemy>();
             body = GetComponent<Rigidbody2D>();
             baseGravityScale = body.gravityScale;
+
+            // Charge glow and shockwave in its owner's colour.
+            float hue = TriangleKinds.HueShiftOf(this);
+            chargeColor = TriangleKinds.Tint(chargeColor, hue);
+            shockwave.topColor = TriangleKinds.Tint(shockwave.topColor, hue);
+            shockwave.bottomColor = TriangleKinds.Tint(shockwave.bottomColor, hue);
+            shockwave.outlineColor = TriangleKinds.Tint(shockwave.outlineColor, hue);
         }
 
         private void Start() => cameraFollow = FindAnyObjectByType<CameraFollow2D>();
@@ -261,7 +268,7 @@ namespace ProjectCircle.Enemies
         private void Finish()
         {
             phase = Phase.Ready;
-            nextSlamTime = Time.time + cooldown;
+            nextSlamTime = Time.time + cooldown / Mathf.Max(0.1f, enemy.EffectiveHaste); // an Overseer makes it attack more often
             enemy.EndAttack();
         }
 
@@ -276,7 +283,7 @@ namespace ProjectCircle.Enemies
         {
             if (phase != Phase.Recover) return false;
             phase = Phase.Ready;
-            nextSlamTime = Time.time + cooldown;
+            nextSlamTime = Time.time + cooldown / Mathf.Max(0.1f, enemy.EffectiveHaste);
             enemy.EndAttack();
             return true;
         }
@@ -287,7 +294,7 @@ namespace ProjectCircle.Enemies
             bool wasLocked = enemy != null && enemy.IsAttackLocked;
             if (body != null) body.gravityScale = baseGravityScale;
             phase = Phase.Ready;
-            nextSlamTime = Time.time + cooldown * 0.5f;
+            nextSlamTime = Time.time + cooldown * 0.5f / Mathf.Max(0.1f, enemy.EffectiveHaste);
             if (wasLocked) enemy.EndAttack();
         }
 

@@ -4556,7 +4556,7 @@ MonoBehaviour:
   hallCentreTrigger: {fileID: 1712770278}
   stringHall: {fileID: 1570163770}
   hallName: The Hall of Strings
-  capeAbilities: 15
+  capeAbilities: 2
   gameTitle: PROJECT CIRCLE
   capeHint: 'Attack:  Left Mouse      Dash:  Shift      Air jump:  Space (in the
     air)      Parry:  F'
@@ -4727,15 +4727,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5554117204999075124, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
       propertyPath: targetScene
-      value: EnemyTest
+      value: Graveyard
       objectReference: {fileID: 0}
     - target: {fileID: 5554117204999075124, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
       propertyPath: targetDoorId
-      value: StoryDoor
+      value: FromHall
       objectReference: {fileID: 0}
     - target: {fileID: 6437791611980410406, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
       propertyPath: m_text
-      value: Enemy Test
+      value: Broken Vertex Graveyard
       objectReference: {fileID: 0}
     - target: {fileID: 6437791611980410406, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
       propertyPath: m_fontColor32.rgba
@@ -4747,7 +4747,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8034250057245064984, guid: a9ea044dba0d14c4db8971a316cd7824, type: 3}
       propertyPath: m_Name
-      value: Door To Enemy Test
+      value: Door To Graveyard
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

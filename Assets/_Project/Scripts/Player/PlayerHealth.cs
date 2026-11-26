@@ -56,7 +56,9 @@ namespace ProjectCircle.Player
         public bool IsDead { get; private set; }
         public bool IsInvulnerable =>
             IsDead || Time.time < invulnerableUntil || Time.time < graceUntil ||
-            (invulnerableWhileDashing && movement != null && movement.IsDashing);
+            (invulnerableWhileDashing && movement != null && movement.IsDashing) ||
+            // While its controls are locked (reading, at a Mirror, in a cutscene) the circle cannot defend itself, so nothing hurts it.
+            (input != null && input.ControlsLocked);
 
         /// <summary>
         /// Brief, invisible protection from damage (no flicker). Used when bouncing off an enemy with a down
@@ -66,6 +68,7 @@ namespace ProjectCircle.Player
 
         private float graceUntil = float.NegativeInfinity;
 
+        private PlayerInputReader input;
         private Rigidbody2D body;
         private PlayerMovement movement;
         private PlayerCape cape;
@@ -77,6 +80,7 @@ namespace ProjectCircle.Player
         {
             body = GetComponent<Rigidbody2D>();
             movement = GetComponent<PlayerMovement>();
+            input = GetComponent<PlayerInputReader>();
             cape = GetComponentInChildren<PlayerCape>();
 
             if (flickerRenderers == null || flickerRenderers.Length == 0)
