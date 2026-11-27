@@ -151,7 +151,24 @@ namespace ProjectCircle.Enemies
         /// <paramref name="inset"/> moves the point in towards the centre, e.g. onto the rounded tip.
         /// </summary>
         public Vector2 GetCornerPoint(int corner, float inset = 0f) =>
-            Direction(90f + corner * 120f) * (circumradius - inset);
+            MapPoint(Direction(90f + corner * 120f) * (circumradius - inset));
+
+        // Optional reshaping of the mesh itself: x' = width·x + lean·y (see TriangleKinds.Map). 1 / 0 = equilateral.
+        private float mapWidth = 1f, mapLean = 0f;
+
+        /// <summary>
+        /// Reshapes the drawn triangle (and its corner points) into an isosceles (width &lt; 1) or scalene (lean) shape,
+        /// keeping its floor line. Unlike a transform frame this stays correct while the shape is posed and turned.
+        /// </summary>
+        public void SetShapeMap(float width, float lean)
+        {
+            mapWidth = width;
+            mapLean = lean;
+            Rebuild();
+        }
+
+        /// <summary>The reshaping applied to a point of the equilateral outline.</summary>
+        public Vector2 MapPoint(Vector2 p) => new Vector2(mapWidth * p.x + mapLean * p.y, p.y);
 
         /// <summary>
         /// Fills <paramref name="points"/> with the outline of a rounded equilateral triangle centred on the origin,
@@ -273,7 +290,7 @@ namespace ProjectCircle.Enemies
 
             for (int i = 0; i < points.Count; i++)
             {
-                vertices.Add(points[i]);
+                vertices.Add(MapPoint(points[i]));
                 colors.Add(colorAt(points[i]));
             }
 

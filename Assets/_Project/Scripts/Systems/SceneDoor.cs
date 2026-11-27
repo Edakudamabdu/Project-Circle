@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ProjectCircle.Player;
 using UnityEngine;
 
@@ -32,6 +33,15 @@ namespace ProjectCircle.Systems
         [Tooltip("Door Id of the door to arrive at in that scene.")]
         [SerializeField] private string targetDoorId = "A";
 
+        [Header("Room Edge (camera)")]
+        [Tooltip("For an opening at the left or right end of a room: the camera stops at this door's line (yellow in the " +
+                 "Scene view) so the circle walks off-screen into the gap and the next room is never shown. " +
+                 "Moving the door moves the stop with it. None for doorways and hatches in the middle of a room.")]
+        [SerializeField] private CameraStopSide cameraStop = CameraStopSide.None;
+
+        [Tooltip("How far the camera stop sits from this door's position, towards the room (usually the wall's outer face).")]
+        [SerializeField] private float cameraStopOffset = 1f;
+
         [Header("Detection & Feel")]
         [SerializeField] private LayerMask playerLayers = 1 << 8;
 
@@ -50,9 +60,34 @@ namespace ProjectCircle.Systems
         private bool armed;
         private Color glowBaseColor;
 
+        /// <summary>Which end of the room an opening is at (for the camera stop).</summary>
+        public enum CameraStopSide { None, Left, Right }
+
+        private static readonly List<SceneDoor> active = new List<SceneDoor>();
+
+        /// <summary>Every enabled door in the loaded scenes.</summary>
+        public static IReadOnlyList<SceneDoor> Active => active;
+
+        public string DoorId => doorId;
+        public string TargetScene => targetScene;
+        public string TargetDoorId => targetDoorId;
+
+        /// <summary>Which side of the room this opening is on (None = not a room edge).</summary>
+        public CameraStopSide CameraStop => cameraStop;
+
+        /// <summary>World x the camera's view stops at for this opening.</summary>
+        public float CameraStopX => transform.position.x + (cameraStop == CameraStopSide.Right ? cameraStopOffset : -cameraStopOffset);
+
         // Enter Play Mode Options skip the domain reload, so statics must be cleared by hand.
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics() => pendingArrivalDoor = null;
+        private static void ResetStatics()
+        {
+            pendingArrivalDoor = null;
+            active.Clear();
+        }
+
+        private void OnEnable() => active.Add(this);
+        private void OnDisable() => active.Remove(this);
 
         private void Awake()
         {
@@ -104,6 +139,13 @@ namespace ProjectCircle.Systems
 
             Vector2 point = (Vector2)transform.position + arrivalOffset;
             var body = player.GetComponent<Rigidbody2D>();
+
+            // Safety net for edited levels: if the arrival point ended up inside a wall or platform, lift the circle
+            // out (up to 6 units) rather than trapping it in the geometry.
+            var playerCollider = player.GetComponent<Collider2D>();
+            float radius = playerCollider != null ? Mathf.Max(playerCollider.bounds.extents.x, playerCollider.bounds.extents.y) : 0.5f;
+            int solid = LayerMask.GetMask("Ground");
+            for (int i = 0; i < 24 && Physics2D.OverlapCircle(point, radius * 0.95f, solid) != null; i++) point += Vector2.up * 0.25f;
             body.position = point;
             player.transform.position = point;
             player.ResetMotion();
@@ -123,6 +165,18 @@ namespace ProjectCircle.Systems
             // Where the circle arrives.
             Gizmos.color = new Color(0.4f, 1f, 0.6f, 0.8f);
             Gizmos.DrawWireSphere(transform.position + (Vector3)arrivalOffset, 0.5f);
+
+            // The camera stop for a room-edge opening.
+            if (cameraStop != CameraStopSide.None)
+            {
+                Gizmos.color = new Color(1f, 0.85f, 0.2f, 0.9f);
+                Gizmos.DrawLine(new Vector3(CameraStopX, transform.position.y - 6f), new Vector3(CameraStopX, transform.position.y + 14f));
+            }
+
+            // Where it leads, so the links can be read straight off the Scene view.
+            UnityEditor.Handles.color = Color.white;
+            UnityEditor.Handles.Label(transform.position + Vector3.up * 1.5f,
+                $"{doorId}  →  {(string.IsNullOrEmpty(targetScene) ? "(nowhere)" : targetScene)} / {targetDoorId}");
         }
 #endif
     }

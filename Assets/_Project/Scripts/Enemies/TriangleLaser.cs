@@ -1,6 +1,7 @@
 using System;
 using ProjectCircle.Combat;
 using ProjectCircle.Player;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 
 namespace ProjectCircle.Enemies
@@ -247,6 +248,7 @@ namespace ProjectCircle.Enemies
             reflected = false;
             SetPhase(Phase.Rise);
             Systems.Fx.Converge(VertexPosition(), vertexGlowColor, riseTime + aimTime, 1.4f, 10); // charging the vertex
+            Sfx.Play(SoundId.LaserCharge, VertexPosition());
         }
 
         private void UpdateRise()
@@ -285,6 +287,7 @@ namespace ProjectCircle.Enemies
             {
                 SetPhase(Phase.Fire);
                 if (muzzleGlow != null) muzzleGlow.Burst();
+                Sfx.Play(SoundId.LaserFire, VertexPosition());
                 Fired?.Invoke();
             }
         }

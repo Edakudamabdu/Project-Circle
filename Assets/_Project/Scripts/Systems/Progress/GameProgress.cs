@@ -42,7 +42,18 @@ namespace ProjectCircle.Systems
             Abilities = PlayerAbility.None;
             flags.Clear();
             Changed = null;
+            CarriedHealth = -1;
+            CarriedThreads = -1f;
         }
+
+        /// <summary>
+        /// Health the circle had when it left the last scene (-1 = none: arrive at full health, e.g. a fresh run).
+        /// Written by <see cref="Player.PlayerHealth"/> as the scene unloads, read back by the next scene's circle.
+        /// </summary>
+        public static int CarriedHealth { get; set; } = -1;
+
+        /// <summary>Mend Threads carried over from the last scene (-1 = none: the scene's starting amount).</summary>
+        public static float CarriedThreads { get; set; } = -1f;
 
         /// <summary>Starts the run with this cape state and these abilities (only the first call counts).</summary>
         public static void Begin(bool hasCape, PlayerAbility abilities, IEnumerable<string> startFlags = null)

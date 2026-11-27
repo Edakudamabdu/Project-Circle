@@ -1,4 +1,5 @@
 using ProjectCircle.Player;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 
 namespace ProjectCircle.Systems
@@ -50,6 +51,7 @@ namespace ProjectCircle.Systems
             for (int i = 0; i < 4; i++)
                 Fx.Shards(new Vector2(b.center.x, b.min.y + b.size.y * (i + 0.5f) / 4f), debrisColor, 8, 7f, 0.22f);
             Fx.Dust(new Vector2(b.center.x, b.min.y), b.size.x + 2f, 1.4f);
+            Sfx.Play(SoundId.WallCrumble, b.center);
             var cam = FindAnyObjectByType<CameraFollow2D>();
             if (cam != null) cam.Shake(0.25f, 0.3f);
             gameObject.SetActive(false);

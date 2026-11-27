@@ -409,7 +409,6 @@ GameObject:
   m_Component:
   - component: {fileID: 67800119}
   - component: {fileID: 67800118}
-  - component: {fileID: 67800117}
   m_Layer: 0
   m_Name: Region
   m_TagString: Untagged
@@ -417,22 +416,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &67800117
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 67800116}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64f8a308ccf36354fa1fa3989fcef1ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Systems.CameraBounds2D
-  limitLeft: 1
-  minX: -12
-  limitRight: 0
-  maxX: 100
 --- !u!114 &67800118
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -447,6 +430,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Systems.RegionInfo
   regionName: Road to the Square Realm
   showNameOnEnter: 1
+  ambience: {fileID: 8300000, guid: c5dfeefdb7ccd304c95423222976c11e, type: 3}
+  ambienceVolume: 0.3
   devCape: 1
   devAbilities: 15
   devFlags:
@@ -1837,6 +1822,10 @@ PrefabInstance:
     - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
       propertyPath: doorId
       value: FromTemple
+      objectReference: {fileID: 0}
+    - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
+      propertyPath: cameraStop
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
       propertyPath: targetScene

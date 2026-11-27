@@ -1,4 +1,5 @@
 using System;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 
 namespace ProjectCircle.Combat
@@ -62,6 +63,13 @@ namespace ProjectCircle.Combat
             lastHitTime = float.NegativeInfinity;
         }
 
+        /// <summary>Sets the health directly (1..max) without counting as a hit, e.g. bosses sharing health.</summary>
+        public void SetHealth(int value)
+        {
+            if (IsDead) return;
+            CurrentHealth = Mathf.Clamp(value, 1, maxHealth);
+        }
+
         /// <summary>
         /// Deals damage from a source position. Returns true if the hit landed (false if already dead or
         /// hit a moment ago).
@@ -87,6 +95,9 @@ namespace ProjectCircle.Combat
             if (CurrentHealth == 0)
             {
                 IsDead = true;
+                // Breaking apart: big ones (bosses) deeper and a little softer, their arena adds its own sound.
+                bool big = MaxHealth >= 20;
+                Sfx.Play(SoundId.EnemyShatter, transform.position, big ? 0.7f : 1f, big ? 0.7f : 1f);
                 Died?.Invoke();
             }
 

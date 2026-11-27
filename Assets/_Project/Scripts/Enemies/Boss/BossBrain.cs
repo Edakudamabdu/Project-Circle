@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ProjectCircle.Combat;
 using ProjectCircle.Player;
 using ProjectCircle.Systems;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 
 namespace ProjectCircle.Enemies.Boss
@@ -25,7 +26,7 @@ namespace ProjectCircle.Enemies.Boss
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody2D), typeof(EnemyHealth))]
-    public sealed class BossBrain : MonoBehaviour
+    public sealed class BossBrain : MonoBehaviour, IArenaBoss
     {
         [Header("Identity")]
         [SerializeField] private string bossName = "Base Warden";
@@ -320,6 +321,23 @@ namespace ProjectCircle.Enemies.Boss
             FightReset?.Invoke();
         }
 
+        /// <summary>Already standing in the arena: no entrance.</summary>
+        public IEnumerator Entrance() { yield break; }
+
+        /// <summary>One health bar along the top of the screen.</summary>
+        public void ShowHealthBar() => UI.BossHealthBar.Instance.Show(bossName, Health);
+
+        public void HideHealthBar() => UI.BossHealthBar.Instance.Hide();
+
+        /// <summary>Back to normal gravity, standing upright and still (e.g. after a move was cut short mid-air).</summary>
+        public void Settle()
+        {
+            Body.gravityScale = baseGravityScale;
+            Body.linearVelocity = Vector2.zero;
+            ResetPose();
+            if (shape != null) shape.SetCornerGlow(-1, 0f, Color.white);
+        }
+
         /// <summary>Changes the boss's resting colours.</summary>
         public void SetColours(Color top, Color bottom)
         {
@@ -484,7 +502,8 @@ namespace ProjectCircle.Enemies.Boss
             Fx.Puff(new Vector2(Body.position.x + dir * SideLength * 0.5f, FloorY), 0.9f);
         }
 
-        private void MoveBody(Vector2 position)
+        /// <summary>Puts the body (and the object) at <paramref name="position"/>, standing still.</summary>
+        public void MoveBody(Vector2 position)
         {
             Body.position = position;
             transform.position = position;
@@ -516,6 +535,7 @@ namespace ProjectCircle.Enemies.Boss
             Body.gravityScale = baseGravityScale;
             Body.linearVelocity = Vector2.zero;
             Fx.Dust(new Vector2(Body.position.x, FloorY), SideLength * 0.6f, 0.6f); // a heavy landing
+            Sfx.Play(SoundId.BossLand, Body.position, 0.6f, 1.1f);
         }
 
         /// <summary>
@@ -679,6 +699,7 @@ namespace ProjectCircle.Enemies.Boss
                 Fx.Shards(centre, baseTop, 40, 14f, 0.3f);
                 Fx.Shards(centre, Color.white, 20, 9f, 0.15f);
                 Fx.Dust(new Vector2(centre.x, ArenaFloorY), SideLength, 1.6f);
+                Sfx.Play(SoundId.BossDefeat, centre);
             }
             if (shape != null)
             {

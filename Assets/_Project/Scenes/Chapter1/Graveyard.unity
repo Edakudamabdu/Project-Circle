@@ -2319,6 +2319,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7477803881305326942, guid: bd7db629f8bc74744ab1e68e8c4b260f, type: 3}
+      propertyPath: kind
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8317098295452893020, guid: bd7db629f8bc74744ab1e68e8c4b260f, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -3498,7 +3502,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1026953335}
   - component: {fileID: 1026953334}
-  - component: {fileID: 1026953333}
   m_Layer: 0
   m_Name: Region
   m_TagString: Untagged
@@ -3506,22 +3509,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1026953333
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1026953332}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64f8a308ccf36354fa1fa3989fcef1ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Systems.CameraBounds2D
-  limitLeft: 1
-  minX: -12
-  limitRight: 1
-  maxX: 126
 --- !u!114 &1026953334
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3536,6 +3523,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Systems.RegionInfo
   regionName: Broken Vertex Graveyard
   showNameOnEnter: 1
+  ambience: {fileID: 8300000, guid: 07318c1b0feb37844b8da272cc6bf122, type: 3}
+  ambienceVolume: 0.35
   devCape: 1
   devAbilities: 2
   devFlags: []
@@ -3890,6 +3879,10 @@ PrefabInstance:
     - target: {fileID: 4483277635272017139, guid: bd7db629f8bc74744ab1e68e8c4b260f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7477803881305326942, guid: bd7db629f8bc74744ab1e68e8c4b260f, type: 3}
+      propertyPath: kind
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8317098295452893020, guid: bd7db629f8bc74744ab1e68e8c4b260f, type: 3}
       propertyPath: m_Mesh
@@ -4320,6 +4313,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7477803881305326942, guid: bd7db629f8bc74744ab1e68e8c4b260f, type: 3}
+      propertyPath: kind
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8317098295452893020, guid: bd7db629f8bc74744ab1e68e8c4b260f, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -4707,6 +4704,10 @@ PrefabInstance:
     - target: {fileID: 7359055207786781206, guid: b0c543f502cb82a4faf8811de1bad419, type: 3}
       propertyPath: m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8891087343757126744, guid: b0c543f502cb82a4faf8811de1bad419, type: 3}
+      propertyPath: kind
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5989,6 +5990,10 @@ PrefabInstance:
       value: ToSlums
       objectReference: {fileID: 0}
     - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
+      propertyPath: cameraStop
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
       propertyPath: targetScene
       value: ScaleneSlums
       objectReference: {fileID: 0}
@@ -6902,6 +6907,10 @@ PrefabInstance:
     - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
       propertyPath: doorId
       value: FromHall
+      objectReference: {fileID: 0}
+    - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
+      propertyPath: cameraStop
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
       propertyPath: targetScene

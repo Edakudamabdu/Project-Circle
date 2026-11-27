@@ -3,55 +3,74 @@ using UnityEngine;
 namespace ProjectCircle.Systems
 {
     /// <summary>
-    /// Horizontal limits for the follow camera in this scene. The camera stops so its view never shows past
-    /// <see cref="MinX"/> / <see cref="MaxX"/>: at a room's exit opening the camera holds still while the circle
-    /// walks on into the gap and off-screen, where the transition trigger waits — so the next room is never exposed.
-    /// For shafts and holes (vertical exits) see <see cref="CameraLimitZone"/>.
-    /// One per scene (usually on the Region object). Drag the limits in the Inspector; the yellow lines show them.
+    /// Horizontal limits for the follow camera. At a room's exit opening the camera holds still while the circle
+    /// walks on into the gap and off-screen, where the transition trigger waits, so the next room is never shown.
+    ///
+    /// Most rooms need nothing here: every <see cref="SceneDoor"/> set as a room edge (its <c>Camera Stop</c> field)
+    /// stops the camera at its own line, and moves with the door. This component is only for extra limits on a side
+    /// with no opening (e.g. a dead end you don't want the camera to look past). One per scene, usually on the Region
+    /// object. For shafts and holes (vertical exits) see <see cref="CameraLimitZone"/>.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class CameraBounds2D : MonoBehaviour
     {
-        [Tooltip("Clamp the left side of the view.")]
+        [Tooltip("Extra limit on the left side (in addition to any room-edge doors).")]
         [SerializeField] private bool limitLeft;
 
-        [Tooltip("World x the left edge of the view never goes past (usually the outer face of the wall above a west opening).")]
+        [Tooltip("World x the left edge of the view never goes past.")]
         [SerializeField] private float minX = -12f;
 
-        [Tooltip("Clamp the right side of the view.")]
+        [Tooltip("Extra limit on the right side (in addition to any room-edge doors).")]
         [SerializeField] private bool limitRight;
 
         [Tooltip("World x the right edge of the view never goes past.")]
         [SerializeField] private float maxX = 100f;
 
-        /// <summary>Left limit, or negative infinity when the left side is free.</summary>
-        public float MinX => limitLeft ? minX : float.NegativeInfinity;
+        private static CameraBounds2D instance;
 
-        /// <summary>Right limit, or positive infinity when the right side is free.</summary>
-        public float MaxX => limitRight ? maxX : float.PositiveInfinity;
+        private void OnEnable() => instance = this;
+        private void OnDisable() { if (instance == this) instance = null; }
 
-        /// <summary>Sets (or widens) the left limit. Used by the level builder for each west opening.</summary>
-        public void AddLeftLimit(float x)
+        /// <summary>
+        /// The scene's horizontal camera limits: the outermost room-edge door on each side, combined with this
+        /// component's extra limits if there is one. Infinite on a side with neither.
+        /// </summary>
+        public static void GetLimits(out float min, out float max)
         {
-            minX = limitLeft ? Mathf.Min(minX, x) : x;
-            limitLeft = true;
-        }
+            min = float.NegativeInfinity;
+            max = float.PositiveInfinity;
+            bool hasLeft = false, hasRight = false;
 
-        /// <summary>Sets (or widens) the right limit. Used by the level builder for each east opening.</summary>
-        public void AddRightLimit(float x)
-        {
-            maxX = limitRight ? Mathf.Max(maxX, x) : x;
-            limitRight = true;
+            foreach (SceneDoor door in SceneDoor.Active)
+            {
+                if (door.CameraStop == SceneDoor.CameraStopSide.Left)
+                {
+                    min = hasLeft ? Mathf.Min(min, door.CameraStopX) : door.CameraStopX;
+                    hasLeft = true;
+                }
+                else if (door.CameraStop == SceneDoor.CameraStopSide.Right)
+                {
+                    max = hasRight ? Mathf.Max(max, door.CameraStopX) : door.CameraStopX;
+                    hasRight = true;
+                }
+            }
+
+            if (instance != null)
+            {
+                if (instance.limitLeft) min = hasLeft ? Mathf.Min(min, instance.minX) : instance.minX;
+                if (instance.limitRight) max = hasRight ? Mathf.Max(max, instance.maxX) : instance.maxX;
+            }
         }
 
         /// <summary>
-        /// Clamps a camera centre x so a view of the given half-width stays inside the limits.
+        /// Clamps a camera centre x so a view of the given half-width stays inside the scene's limits.
         /// If the room is narrower than the view, the camera centres on the room.
         /// </summary>
-        public float ClampCentreX(float x, float halfWidth)
+        public static float ClampCentreX(float x, float halfWidth)
         {
-            float lo = MinX + halfWidth, hi = MaxX - halfWidth;
-            if (lo > hi) return (MinX + MaxX) * 0.5f;
+            GetLimits(out float min, out float max);
+            float lo = min + halfWidth, hi = max - halfWidth;
+            if (lo > hi) return (min + max) * 0.5f;
             return Mathf.Clamp(x, lo, hi);
         }
 
@@ -60,7 +79,8 @@ namespace ProjectCircle.Systems
         {
             Gizmos.color = new Color(1f, 0.85f, 0.2f, 0.9f);
             if (limitLeft) Gizmos.DrawLine(new Vector3(minX, -20f), new Vector3(minX, 60f));
-            if (limitRight) Gizmos.DrawLine(new Vector3(maxX, -20f), new Vector3(maxX, 60f));        }
+            if (limitRight) Gizmos.DrawLine(new Vector3(maxX, -20f), new Vector3(maxX, 60f));
+        }
 #endif
     }
 }

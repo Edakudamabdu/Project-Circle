@@ -97,6 +97,7 @@ namespace ProjectCircle.EditorTools
             for (int i = 0; i < flagsProp.arraySize; i++) flagsProp.GetArrayElementAtIndex(i).stringValue = devFlags[i];
             so.FindProperty("notes").stringValue = notes;
             so.ApplyModifiedPropertiesWithoutUndo();
+            AudioSetup.ApplyAmbience(info);
 
             doors = Group("Doors");
             checkpoints = Group("Checkpoints");
@@ -200,12 +201,17 @@ namespace ProjectCircle.EditorTools
             box.offset = new Vector2(outward * EdgeTriggerDepth, height * 0.5f);
             SetDoor(go, id, targetScene, targetDoor, new Vector2(-outward * 2.5f, 0.5f));
 
-            // Stop the camera at the wall's outer face.
-            var limits = region.GetComponent<CameraBounds2D>();
-            if (limits == null) limits = region.gameObject.AddComponent<CameraBounds2D>();
-            if (exitIsOnRight) limits.AddRightLimit(x + 1f);
-            else limits.AddLeftLimit(x - 1f);
-            EditorUtility.SetDirty(limits);
+            // The door itself stops the camera at the wall's outer face (and keeps doing so wherever it's moved).
+            SetCameraStop(go.GetComponent<SceneDoor>(), exitIsOnRight);
+        }
+
+        /// <summary>Marks a door as a room-edge opening on the given side, with its camera stop 1 unit outward.</summary>
+        public static void SetCameraStop(SceneDoor door, bool exitIsOnRight)
+        {
+            var so = new SerializedObject(door);
+            so.FindProperty("cameraStop").enumValueIndex = (int)(exitIsOnRight ? SceneDoor.CameraStopSide.Right : SceneDoor.CameraStopSide.Left);
+            so.FindProperty("cameraStopOffset").floatValue = 1f;
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         /// <summary>How far past the opening an edge's trigger sits (the circle is off-screen by then).</summary>

@@ -95,10 +95,11 @@ Regions connect like Hollow Knight: you walk off the edge of one room into the n
 same **SceneDoor** script, so they're set up the same way:
 - **SceneEdge** (`Prefabs/World`): an opening at the left/right end of a room. Past the opening is a short **gap**
   (a 6-deep tunnel with a floor, a roof and a backstop at the end). The SceneEdge object sits in the opening; its
-  trigger box is offset 2.5 units out into the gap. The **Region** object's **Camera Bounds 2D** component stops the
-  camera at the wall's outer face (the yellow line in the Scene view), so the circle walks off-screen into the gap
-  before the trigger fires and the far side is never shown. If you move an opening, move its camera limit with it,
-  and keep the gap's floor under the trigger.
+  trigger box is offset 2.5 units out into the gap. Its **Camera Stop** field (Left / Right) stops the camera at the
+  wall's outer face (the yellow line in the Scene view), so the circle walks off-screen into the gap before the
+  trigger fires and the far side is never shown. **The stop belongs to the edge: drag the edge object and the camera
+  stop, trigger and arrival point all move with it.** Just keep the gap's floor under the trigger and the wall around
+  the opening.
 - **Hatch**: the same thing lying flat, for shafts you drop down or climb up through (e.g. Terraces ↔ Squares' Refuge).
   It works like an edge, but vertically: the hatch's **Camera Limit Zone** component stops the view 1.2 units short of
   the trigger, only while the circle is inside its area (cyan box), so the circle climbs or drops off-screen
@@ -118,9 +119,28 @@ Transitions come in pairs: if you rename an id, rename the matching **Target Doo
 A gate (SealGate, MouldGate, WardenGate) placed in front of an edge or building is what locks it — the edge itself is
 always open.
 
+**Editing levels safely.** Move platforms, walls and doors freely; the transitions are built to cope:
+- In the Scene view every door shows a label (`ToSlums → ScaleneSlums / FromGraveyard`), a green circle where the
+  circle arrives, and (for room edges) the yellow camera-stop line.
+- The **Target Scene** is a dropdown of the game's scenes in the door's Inspector, so it can't be misspelled.
+- If an arrival point ends up inside a wall or platform after an edit, the circle is lifted out of it on arrival.
+- **After editing, run `Project Circle ▸ Level Building ▸ Check Scene Links`** (or the *Check All Scene Links* button on
+  any door). It opens every scene and lists, in the Console, any door whose target scene or door is missing, any
+  duplicate Door Id, any arrival point stuck in a wall, and any room edge without a camera stop. "All fine" means
+  every room still connects. (The three warnings about the old *EnemyTest* scene are expected.)
+- Health and Mend Threads carry from one scene to the next; only dying or resting at a Mirror refills them.
+
 **Base Warden arena:** you come in from the Slums on the west edge; the fight starts once you walk past the entry
 trigger. The way on is a corridor to the east, sealed by a WardenGate that opens on `Seal.Warden`. Keep the corridor
-outside the arena walls (x > 34), or the Warden can wander into it.
+outside the arena walls (x > 34), or the Warden can wander into it. When the Warden falls, it leaves the double jump
+behind as a cape string in the middle of the arena (the **BossArena** component's *Reward* fields); the camera keeps
+the arena framed until the circle walks out.
+
+**Twin Isosceles arena** (`TwinIsosceles` scene, object **Twin Arena**): an open, mirrored hall with gates at both ends.
+The twins (Iso and Skelos, under *Twin Arena/Twin Isosceles*) wait out of sight above the arena and drop in on either
+side when the circle walks in; the gates rise once both have landed. Their moves and timings are on the **TwinIsosceles**
+component (charge speed, crosshair chase and lock time, plunge height and speed, compass size and orb rate, entrance
+height...). Keep the hall symmetric around *Arena Centre*: the Mirror Slam, the landing spots and the Compass use it. `Project Circle ▸ Level Building ▸ Build Twin Isosceles Arena` rebuilds only the *Twin Arena* object.
 New scenes must be added to **File ▸ Build Profiles ▸ Scene List**, or doors can't load them.
 
 ## Progress, gates and testing
@@ -140,3 +160,15 @@ carries from scene to scene. Story flags used: `Seal.Warden`, `Seal.Twins`, `Sea
 `Project Circle ▸ Level Building ▸ Build ALL Chapter 1 regions` regenerates every region from the layouts in
 `Scripts/Editor/LevelBuilding/ChapterOneLayouts.cs`. **It overwrites those scenes**: never run it once anyone has
 started redesigning a region by hand.
+
+## Sound
+
+- **Sound effects** are set in one asset: `Assets/_Project/Resources/SoundLibrary`. Select it and each entry
+  (Swing, EnemyHit, Gate, ...) shows its clip(s), volume, pitch and pitch jitter. To change a sound, drag a
+  different clip in (several clips = one picked at random). Don't move or rename the asset: the game loads it by name.
+- **Clips** live in `Assets/_Project/Audio/SFX/<Player|Enemies|Bosses|World|UI>` and `Audio/Ambience`.
+- **Region ambience**: the `Region` object's RegionInfo has an *Ambience* clip and volume. Neighbouring regions
+  with the same loop keep it playing through doors; a different loop cross-fades.
+- **Boss music**: the BossArena component's *Fight Music* field. The ambience dips while it plays.
+- **Project Circle → Audio → Set Up Sounds** fixes import settings, adds library entries for any new sound ids,
+  and gives regions without ambience their default loop. It never overwrites choices you've made.

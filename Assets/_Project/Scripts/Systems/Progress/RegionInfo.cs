@@ -1,5 +1,6 @@
 using ProjectCircle.Player;
 using ProjectCircle.Systems.Story;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 
 namespace ProjectCircle.Systems
@@ -18,6 +19,12 @@ namespace ProjectCircle.Systems
         [SerializeField] private string regionName = "Region";
 
         [SerializeField] private bool showNameOnEnter = true;
+
+        [Header("Ambience")]
+        [Tooltip("Background loop for this region (Audio/Ambience). Regions sharing a loop keep it playing through doors.")]
+        [SerializeField] private AudioClip ambience;
+
+        [SerializeField, Range(0f, 1f)] private float ambienceVolume = 0.35f;
 
         [Header("Dev start (only when this scene is the first one loaded)")]
         [Tooltip("Wear the cape when playing this region directly.")]
@@ -46,6 +53,7 @@ namespace ProjectCircle.Systems
 
         private void Start()
         {
+            Sfx.SetAmbience(ambience, ambienceVolume);
             if (showNameOnEnter && !string.IsNullOrEmpty(regionName) && CinematicOverlay.Instance != null)
                 CinematicOverlay.Instance.ShowAreaName(regionName.ToUpperInvariant(), 2f);
         }

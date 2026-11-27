@@ -1,6 +1,7 @@
 using System.Collections;
 using ProjectCircle.Player;
 using ProjectCircle.UI;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 
 namespace ProjectCircle.Systems.Story
@@ -71,6 +72,10 @@ namespace ProjectCircle.Systems.Story
         [SerializeField] private PlayerAbility capeAbilities = PlayerAbility.All;
         [SerializeField] private string gameTitle = "PROJECT CIRCLE";
         [SerializeField] private string capeHint = "Attack:  Left Mouse      Dash:  Shift      Air jump:  Space (in the air)      Parry:  F";
+
+        [Tooltip("Plays once when the title appears (Audio/Music). The ambience dips under it.")]
+        [SerializeField] private AudioClip titleMusic;
+        [SerializeField, Range(0f, 1f)] private float titleMusicVolume = 0.6f;
 
         /// <summary>True once the opening has been played this session (it won't play again).</summary>
         public static bool Completed { get; private set; }
@@ -207,6 +212,7 @@ namespace ProjectCircle.Systems.Story
             {
                 movement.ApplyKnockback(new Vector2(towardPlayer, 0.35f));
                 cameraFollow.Shake(0.12f, 0.2f);
+                Sfx.Play(SoundId.Shove, player.position);
             });
             yield return new WaitForSeconds(0.7f);
 
@@ -238,11 +244,15 @@ namespace ProjectCircle.Systems.Story
             cameraFollow.CutTo(povShot.CameraPoint, povShot.CameraSize);
             overlay.SetBlack(0f);
 
+            // Their glowing points crackle with power, under the whole shot.
+            AudioSource crackle = Sfx.PlayHeld(SoundId.VertexCrackle);
+
             Coroutine creep = StartCoroutine(povShot.CreepIn(5f));
             yield return new WaitForSeconds(1.2f);
             yield return Say(bully1Pov);
             StopCoroutine(creep);
 
+            Sfx.Play(SoundId.VertexZap); // the leader's point flares as it rears up
             yield return povShot.RearUp(0.9f);
             yield return new WaitForSeconds(0.2f);
 
@@ -250,6 +260,10 @@ namespace ProjectCircle.Systems.Story
             StartCoroutine(povShot.Lunge(1.6f));
             cameraFollow.Shake(0.08f, 1.6f);
             yield return overlay.PassOut();
+
+            // The hit lands in the dark.
+            Sfx.Stop(crackle, 0.15f);
+            Sfx.Play(SoundId.PovHit, 1f, 0.8f);
         }
 
         #endregion
@@ -297,6 +311,7 @@ namespace ProjectCircle.Systems.Story
 
             // The world shakes; the Shapeshifter pulls at him.
             cameraFollow.Shake(0.3f, 1.8f);
+            Sfx.Play(SoundId.Rumble);
             oldTriangle.Agitated = true;
             yield return new WaitForSeconds(1.6f);
 
@@ -316,6 +331,7 @@ namespace ProjectCircle.Systems.Story
             Vector2 wall = gateway.transform.position;
             cameraFollow.FocusOn(new Vector2((old.x + wall.x) * 0.5f, old.y + 2.5f), 5.2f, 0.8f);
             yield return new WaitForSeconds(0.6f);
+            Sfx.Play(SoundId.LightPour, old);
             yield return gateway.Open(OldTriangleCorners());
             cameraFollow.Shake(0.2f, 0.4f);
             yield return new WaitForSeconds(0.6f);
@@ -354,16 +370,19 @@ namespace ProjectCircle.Systems.Story
             cameraFollow.FocusOn((Vector2)player.position + Vector2.up * 1.6f, 5f, 0.9f);
             yield return new WaitForSeconds(1f);
 
+            Sfx.Play(SoundId.StringsGather);
             yield return stringHall.FormCape(player, 2.6f);
 
             // The strings become the cape: it wraps tight around the circle, then opens.
             abilities.GiveCape(capeAbilities);
             cape.PlayWrap(1f);
+            Sfx.Play(SoundId.CapeWrap);
             health.SetRespawnPoint(player.position);
             cameraFollow.Shake(0.12f, 0.35f);
             yield return new WaitForSeconds(2f);
 
             cameraFollow.ClearFocus();
+            PlayTitleMusic();
             yield return overlay.ShowTitle(gameTitle, 2.4f);
             yield return overlay.Letterbox(false);
 
@@ -378,6 +397,21 @@ namespace ProjectCircle.Systems.Story
 
         private void Lock() => input.AddControlLock(this);
         private void Unlock() => input.RemoveControlLock(this);
+
+        /// <summary>The title theme, once; the ambience dips under it and comes back as it ends.</summary>
+        private void PlayTitleMusic()
+        {
+            if (titleMusic == null) return;
+            Sfx.PlayMusic(titleMusic, titleMusicVolume);
+            Sfx.DuckAmbience(true, 1.5f);
+            StartCoroutine(UnduckAfter(titleMusic.length - 3f));
+        }
+
+        private IEnumerator UnduckAfter(float seconds)
+        {
+            yield return new WaitForSecondsRealtime(Mathf.Max(0f, seconds));
+            Sfx.DuckAmbience(false, 3f);
+        }
 
         /// <summary>Plays a dialogue and waits until it has been read.</summary>
         private IEnumerator Say(Dialogue dialogue)

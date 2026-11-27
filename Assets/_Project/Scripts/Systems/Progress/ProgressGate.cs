@@ -1,4 +1,5 @@
 using ProjectCircle.Player;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 
 namespace ProjectCircle.Systems
@@ -60,6 +61,7 @@ namespace ProjectCircle.Systems
             Vector3 to = from + Vector3.down * transform.lossyScale.y;
             var col = GetComponent<Collider2D>();
             if (col != null) Fx.Dust(new Vector2(col.bounds.center.x, col.bounds.min.y), col.bounds.size.x + 1f, 1.2f);
+            Sfx.Play(SoundId.Gate, transform.position, 1f, 0.85f);
             for (float t = 0f; t < openTime && sink; t += Time.deltaTime)
             {
                 transform.position = Vector3.Lerp(from, to, t / openTime) + (Vector3)(Random.insideUnitCircle * 0.04f);

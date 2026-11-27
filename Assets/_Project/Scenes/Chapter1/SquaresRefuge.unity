@@ -1100,6 +1100,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Systems.RegionInfo
   regionName: Square's Refuge
   showNameOnEnter: 1
+  ambience: {fileID: 8300000, guid: 88a11dbe868d3114ab683418971e8d0f, type: 3}
+  ambienceVolume: 0.4
   devCape: 1
   devAbilities: 15
   devFlags:

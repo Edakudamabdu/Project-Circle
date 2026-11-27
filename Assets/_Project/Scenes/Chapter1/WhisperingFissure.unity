@@ -999,6 +999,10 @@ PrefabInstance:
       value: FromSlums
       objectReference: {fileID: 0}
     - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
+      propertyPath: cameraStop
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
       propertyPath: targetScene
       value: ScaleneSlums
       objectReference: {fileID: 0}
@@ -1038,7 +1042,6 @@ GameObject:
   m_Component:
   - component: {fileID: 210164402}
   - component: {fileID: 210164401}
-  - component: {fileID: 210164400}
   m_Layer: 0
   m_Name: Region
   m_TagString: Untagged
@@ -1046,22 +1049,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &210164400
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 210164399}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64f8a308ccf36354fa1fa3989fcef1ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Systems.CameraBounds2D
-  limitLeft: 1
-  minX: -12
-  limitRight: 1
-  maxX: 34
 --- !u!114 &210164401
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1076,6 +1063,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Systems.RegionInfo
   regionName: Whispering Fissure
   showNameOnEnter: 1
+  ambience: {fileID: 8300000, guid: 07318c1b0feb37844b8da272cc6bf122, type: 3}
+  ambienceVolume: 0.35
   devCape: 1
   devAbilities: 11
   devFlags: []
@@ -2072,6 +2061,10 @@ PrefabInstance:
       value: ToPrism
       objectReference: {fileID: 0}
     - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
+      propertyPath: cameraStop
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
       propertyPath: targetScene
       value: PrismCaverns
       objectReference: {fileID: 0}
@@ -2674,6 +2667,10 @@ PrefabInstance:
     - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
       propertyPath: doorId
       value: ToHall
+      objectReference: {fileID: 0}
+    - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
+      propertyPath: cameraStop
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
       propertyPath: targetScene

@@ -14,10 +14,12 @@ namespace ProjectCircle.UI
     /// </summary>
     public sealed class BossHealthBar : MonoBehaviour
     {
-        private const float Width = 1100f;
+        private const float FullWidth = 1100f;
+        private const float HalfWidth = 520f;
+        private float width = FullWidth;
         private const float Height = 22f;
 
-        private static BossHealthBar instance;
+        private static BossHealthBar instance, left, right;
 
         private CanvasGroup group;
         private TMP_Text nameText;
@@ -39,7 +41,13 @@ namespace ProjectCircle.UI
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics() => instance = null;
+        private static void ResetStatics() => instance = left = right = null;
+
+        /// <summary>Half-width bar on the left of the screen, for two bosses fought together.</summary>
+        public static BossHealthBar Left => left != null ? left : (left = Create("Boss Health Bar (Left)", HalfWidth, -HalfWidth * 0.5f - 30f));
+
+        /// <summary>Half-width bar on the right of the screen, for two bosses fought together.</summary>
+        public static BossHealthBar Right => right != null ? right : (right = Create("Boss Health Bar (Right)", HalfWidth, HalfWidth * 0.5f + 30f));
 
         /// <summary>Fades the bar in, tracking <paramref name="bossHealth"/>.</summary>
         public void Show(string bossName, EnemyHealth bossHealth)
@@ -76,8 +84,8 @@ namespace ProjectCircle.UI
 
         private void Redraw()
         {
-            fill.sizeDelta = new Vector2(Width * shown, Height);
-            chip.sizeDelta = new Vector2(Width * chipShown, Height);
+            fill.sizeDelta = new Vector2(width * shown, Height);
+            chip.sizeDelta = new Vector2(width * chipShown, Height);
         }
 
         private void FadeTo(float alpha)
@@ -99,9 +107,9 @@ namespace ProjectCircle.UI
 
         #region Building
 
-        private static BossHealthBar Create()
+        private static BossHealthBar Create(string objectName = "Boss Health Bar", float barWidth = FullWidth, float x = 0f)
         {
-            var root = new GameObject("Boss Health Bar");
+            var root = new GameObject(objectName);
             var canvas = root.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 30; // under the dialogue box and cutscene overlays
@@ -111,24 +119,25 @@ namespace ProjectCircle.UI
             scaler.matchWidthOrHeight = 1f;
 
             var bar = root.AddComponent<BossHealthBar>();
+            bar.width = barWidth;
             var panel = new GameObject("Panel", typeof(RectTransform));
             panel.transform.SetParent(root.transform, false);
             var panelRect = (RectTransform)panel.transform;
             panelRect.anchorMin = panelRect.anchorMax = new Vector2(0.5f, 1f); // top of the screen
-            panelRect.anchoredPosition = new Vector2(0f, -70f);
+            panelRect.anchoredPosition = new Vector2(x, -70f);
             bar.group = panel.AddComponent<CanvasGroup>();
             bar.group.alpha = 0f;
             bar.group.blocksRaycasts = false;
 
-            Image(panel.transform, "Frame", new Color(0.05f, 0.05f, 0.07f, 0.9f), new Vector2(Width + 8f, Height + 8f), centred: true);
-            bar.chip = Image(panel.transform, "Chip", new Color(0.95f, 0.9f, 0.8f, 1f), new Vector2(Width, Height), centred: false);
-            bar.fill = Image(panel.transform, "Fill", new Color(0.72f, 0.24f, 0.3f, 1f), new Vector2(Width, Height), centred: false);
+            Image(panel.transform, "Frame", new Color(0.05f, 0.05f, 0.07f, 0.9f), new Vector2(barWidth + 8f, Height + 8f), barWidth, centred: true);
+            bar.chip = Image(panel.transform, "Chip", new Color(0.95f, 0.9f, 0.8f, 1f), new Vector2(barWidth, Height), barWidth, centred: false);
+            bar.fill = Image(panel.transform, "Fill", new Color(0.72f, 0.24f, 0.3f, 1f), new Vector2(barWidth, Height), barWidth, centred: false);
 
             var nameGo = new GameObject("Name", typeof(RectTransform));
             nameGo.transform.SetParent(panel.transform, false);
             var nameRect = (RectTransform)nameGo.transform;
             nameRect.anchoredPosition = new Vector2(0f, -34f); // under the bar
-            nameRect.sizeDelta = new Vector2(Width, 40f);
+            nameRect.sizeDelta = new Vector2(barWidth, 40f);
             bar.nameText = nameGo.AddComponent<TextMeshProUGUI>();
             if (TMP_Settings.defaultFontAsset != null) bar.nameText.font = TMP_Settings.defaultFontAsset;
             bar.nameText.fontSize = 30f;
@@ -139,14 +148,14 @@ namespace ProjectCircle.UI
             return bar;
         }
 
-        private static RectTransform Image(Transform parent, string name, Color color, Vector2 size, bool centred)
+        private static RectTransform Image(Transform parent, string name, Color color, Vector2 size, float barWidth, bool centred)
         {
             var go = new GameObject(name, typeof(RectTransform));
             go.transform.SetParent(parent, false);
             var rect = (RectTransform)go.transform;
             // Bars grow from the left edge; the frame sits centred behind them.
             rect.pivot = centred ? new Vector2(0.5f, 0.5f) : new Vector2(0f, 0.5f);
-            rect.anchoredPosition = centred ? Vector2.zero : new Vector2(-Width * 0.5f, 0f);
+            rect.anchoredPosition = centred ? Vector2.zero : new Vector2(-barWidth * 0.5f, 0f);
             rect.sizeDelta = size;
             var image = go.AddComponent<UnityEngine.UI.Image>();
             image.color = color;

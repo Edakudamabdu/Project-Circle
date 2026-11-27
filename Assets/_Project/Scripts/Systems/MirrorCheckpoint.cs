@@ -2,6 +2,7 @@ using System.Collections;
 using ProjectCircle.Player;
 using ProjectCircle.UI;
 using TMPro;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -250,6 +251,7 @@ namespace ProjectCircle.Systems
             CheckpointRecord.Set(gameObject.scene.name, mirrorName);
 
             restFlashTime = Time.unscaledTime;
+            Sfx.Play(SoundId.MirrorRest);
             if (menu != null) menu.ShowStatus("Rested. Your reflection will wait for you here.", 2.5f);
         }
 

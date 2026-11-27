@@ -1283,6 +1283,10 @@ PrefabInstance:
       value: FromThrone
       objectReference: {fileID: 0}
     - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
+      propertyPath: cameraStop
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
       propertyPath: targetScene
       value: ApexThrone
       objectReference: {fileID: 0}
@@ -2733,6 +2737,10 @@ PrefabInstance:
       value: ToRoad
       objectReference: {fileID: 0}
     - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
+      propertyPath: cameraStop
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5495188686583177105, guid: 911c3bb1fc9800043b6dc11a4da14aaf, type: 3}
       propertyPath: targetScene
       value: RoadToSquareRealm
       objectReference: {fileID: 0}
@@ -4108,7 +4116,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1694338456}
   - component: {fileID: 1694338455}
-  - component: {fileID: 1694338454}
   m_Layer: 0
   m_Name: Region
   m_TagString: Untagged
@@ -4116,22 +4123,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1694338454
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1694338453}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64f8a308ccf36354fa1fa3989fcef1ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Systems.CameraBounds2D
-  limitLeft: 1
-  minX: -12
-  limitRight: 1
-  maxX: 54
 --- !u!114 &1694338455
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4146,6 +4137,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectCircle.Systems.RegionInfo
   regionName: Temple of Three Points
   showNameOnEnter: 1
+  ambience: {fileID: 8300000, guid: 93ef21b3268bc33479994a44630cd965, type: 3}
+  ambienceVolume: 0.25
   devCape: 1
   devAbilities: 15
   devFlags:

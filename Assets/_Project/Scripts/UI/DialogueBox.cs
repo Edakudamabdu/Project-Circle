@@ -3,6 +3,7 @@ using System.Collections;
 using ProjectCircle.Player;
 using ProjectCircle.Systems;
 using TMPro;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 
 namespace ProjectCircle.UI
@@ -105,6 +106,7 @@ namespace ProjectCircle.UI
             speakerText.text = dialogue.Speaker;
             StopAllCoroutines();
             StartCoroutine(Fade(1f));
+            Sfx.Play(SoundId.DialogueOpen);
             ShowPage();
         }
 
@@ -119,6 +121,7 @@ namespace ProjectCircle.UI
             }
 
             page++;
+            Sfx.Play(SoundId.MenuMove, 0.6f);
             if (page < current.Lines.Count) ShowPage();
             else Close();
         }
@@ -145,6 +148,7 @@ namespace ProjectCircle.UI
                 char c = bodyText.textInfo.characterInfo[shown].character;
                 float wait = 1f / lettersPerSecond;
                 if (c == '.' || c == ',' || c == '!' || c == '?' || c == '…') wait += punctuationPause;
+                if (shown % 2 == 0 && !char.IsWhiteSpace(c)) Sfx.Play(SoundId.DialogueTick); // a soft tick every other letter
                 yield return new WaitForSecondsRealtime(wait);
             }
 

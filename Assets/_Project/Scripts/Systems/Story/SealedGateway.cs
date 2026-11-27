@@ -1,5 +1,6 @@
 using System.Collections;
 using ProjectCircle.Enemies;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 
 namespace ProjectCircle.Systems.Story
@@ -105,6 +106,7 @@ namespace ProjectCircle.Systems.Story
                 });
             }
             Fx.Dust(new Vector2(b.center.x, b.min.y), b.size.x * 3f, 1.2f);
+            Sfx.Play(SoundId.Gate, b.center, 1f, 0.7f);
             for (float t = 0f; t < 0.6f; t += Time.deltaTime)
             {
                 float p = t / 0.6f;

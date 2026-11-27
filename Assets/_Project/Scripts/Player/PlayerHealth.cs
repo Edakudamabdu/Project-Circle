@@ -92,7 +92,22 @@ namespace ProjectCircle.Player
             respawnPoint = body.position;
         }
 
-        private void Start() => HealthChanged?.Invoke(CurrentHealth, maxHealth);
+        private void Start()
+        {
+            // Arriving from another scene: keep the health the circle left with (scene changes don't heal).
+            if (Systems.GameProgress.CarriedHealth > 0)
+            {
+                CurrentHealth = Mathf.Clamp(Systems.GameProgress.CarriedHealth, 1, maxHealth);
+                Systems.GameProgress.CarriedHealth = -1;
+            }
+            HealthChanged?.Invoke(CurrentHealth, maxHealth);
+        }
+
+        /// <summary>Leaving the scene: remember the health for the next one (a dead circle comes back full).</summary>
+        private void OnDestroy()
+        {
+            Systems.GameProgress.CarriedHealth = IsDead ? -1 : CurrentHealth;
+        }
 
         private void Update()
         {

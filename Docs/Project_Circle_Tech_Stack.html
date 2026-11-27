@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Project Circle - Tech Stack Documentation</title>
+<style>
+  @page { size: A4 portrait; margin: 14mm 15mm; }
+  :root { --navy:#1E2A44; --grey:#6B7280; --line:#D9DEE7; --band:#E9ECF2; --soft:#F6F7FA; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 10.5pt; color:#1f2937; background:#fff;
+         -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  h1 { font-size: 24pt; color: var(--navy); margin: 0; letter-spacing: .5px; }
+  .sub { color: var(--grey); font-size: 13pt; margin-top: 2px; }
+  .meta { color: var(--grey); font-style: italic; font-size: 10pt; margin-top: 2px; }
+  .head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 12px; }
+  .stats { display:grid; grid-template-columns: repeat(4, auto); gap: 6px 14px; text-align:right; font-size: 9.5pt; color: var(--grey); }
+  .stats b { color: var(--navy); font-size: 12pt; display:block; }
+  h2 { background: var(--navy); color:#fff; font-size: 10.5pt; letter-spacing:.6px; margin: 14px 0 0; padding: 6px 10px; }
+  p.intro { margin: 6px 0 2px; }
+  table { width:100%; border-collapse: collapse; }
+  th { text-align:left; font-size: 9pt; color: var(--navy); background: var(--band); padding: 5px 8px; letter-spacing:.4px; }
+  td { padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td.k { font-weight: 700; color: var(--navy); width: 21%; }
+  td.why { color: var(--grey); }
+  .arch { display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+  .box { border:1px solid var(--line); background: var(--soft); padding: 7px 9px; }
+  .box b { color: var(--navy); display:block; margin-bottom: 2px; }
+  .box span { color: var(--grey); font-size: 9.5pt; }
+  .flow { margin: 8px 0 0; padding: 7px 10px; border-left: 3px solid var(--navy); background: var(--soft); font-size: 9.8pt; }
+  .two { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .foot { margin-top: 14px; color: var(--grey); font-size: 8.5pt; }
+  .pb { break-before: page; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div>
+    <h1>PROJECT CIRCLE</h1>
+    <div class="sub">Tech Stack Documentation &nbsp;·&nbsp; Project Evaluation I</div>
+    <div class="meta">Innate Interactive &nbsp;·&nbsp; 1st Year, CSA &nbsp;·&nbsp; 27 November 2026</div>
+  </div>
+  <div class="stats">
+    <div><b>Unity 6</b>Engine</div>
+    <div><b>C#</b>Language</div>
+    <div><b>~20,000</b>Lines of code</div>
+    <div><b>Windows PC</b>Platform</div>
+  </div>
+</div>
+
+<p class="intro"><b>Project Circle</b> is a 2D story-driven action platformer about discrimination. The player is a mute circle
+cast out by a world that ranks shapes by their number of corners. It is built in Unity with C#, for Windows PC, playable
+with keyboard and mouse or a gamepad.</p>
+
+<h2>1. CORE TECHNOLOGY</h2>
+<table>
+  <tr><th>LAYER</th><th>TECHNOLOGY</th><th>WHY WE CHOSE IT</th></tr>
+  <tr><td class="k">Game engine</td><td>Unity 6 (6000.5), Personal edition</td><td class="why">Strong 2D tools, free for students, large community and documentation</td></tr>
+  <tr><td class="k">Language</td><td>C#</td><td class="why">Unity's scripting language; clean, object-oriented and fast to iterate in</td></tr>
+  <tr><td class="k">Rendering</td><td>Universal Render Pipeline (URP), 2D Renderer with 2D lights</td><td class="why">Lightweight and runs on modest PCs, with lighting and glow effects for the mood</td></tr>
+  <tr><td class="k">Physics</td><td>Unity 2D Physics (Rigidbody2D, colliders)</td><td class="why">Tight movement, dashing, combat hits and enemy collisions</td></tr>
+  <tr><td class="k">Input</td><td>Unity Input System</td><td class="why">One set of controls for keyboard / mouse and gamepad</td></tr>
+  <tr><td class="k">UI &amp; text</td><td>Unity UI (uGUI) and TextMeshPro</td><td class="why">Health HUD, dialogue boxes, Mirror text and menus with crisp text</td></tr>
+  <tr><td class="k">Cutscenes</td><td>Unity Timeline</td><td class="why">The opening story sequence and camera moments</td></tr>
+  <tr><td class="k">2D packages</td><td>2D Sprite, Tilemap, 2D Animation</td><td class="why">Building levels and animating characters</td></tr>
+</table>
+
+<h2>2. TOOLS BY TEAM MEMBER</h2>
+<table>
+  <tr><th>MEMBER</th><th>ROLE</th><th>TOOLS</th></tr>
+  <tr><td class="k">Abdullah Bin Marzook</td><td>Team lead · programming · map design · writing</td><td>Unity Editor, Visual Studio, Git + GitHub, Claude Pro (AI coding assistant)</td></tr>
+  <tr><td class="k">Rehaan V Harry</td><td>Artist</td><td>Art software (free)</td></tr>
+  <tr><td class="k">Abdul Nafih N</td><td>Audio · systems design</td><td>Audacity, royalty-free audio libraries (Freesound, Pixabay Audio, OpenGameArt)</td></tr>
+  <tr><td class="k">Abhimanyu R</td><td>Lore · mechanics · boss design</td><td>Unity Editor, design documents</td></tr>
+</table>
+
+<h2>3. VERSION CONTROL &amp; COLLABORATION</h2>
+<table>
+  <tr><td class="k">Git + GitHub</td><td>All code and scenes are tracked in Git and hosted on GitHub, giving the team full history, backups and a shared copy of the project.<br>
+  <span class="why">Repository: github.com/Edakudamabdu/Project-Circle</span></td></tr>
+  <tr><td class="k">Project layout</td><td>Everything the team makes lives under <b>Assets/_Project/</b>, split into Scripts, Prefabs, Scenes and Settings, so each member knows where their work goes.</td></tr>
+</table>
+
+<h2 class="pb">4. GAME ARCHITECTURE</h2>
+<p class="intro">The code is split into small modules, each with one job. Modules talk through C# events, so the UI and story
+react to gameplay without being tied to it.</p>
+<div class="arch">
+  <div class="box"><b>Player</b><span>Movement, quickstep dash, jumps, the cape and its abilities (blade, pogo, parry, double jump, Mend)</span></div>
+  <div class="box"><b>Combat</b><span>Health, damage, hit effects and invulnerability</span></div>
+  <div class="box"><b>Enemies</b><span>Triangle enemies with AI by rank: scalene, isosceles, equilateral; sentries, chargers, swarms</span></div>
+  <div class="box"><b>Bosses</b><span>Boss brain with phases and attack moves (the Base Warden)</span></div>
+  <div class="box"><b>World &amp; Progress</b><span>Room transitions, camera, gates, abilities and story flags carried between areas</span></div>
+  <div class="box"><b>Story &amp; UI</b><span>Opening sequence, Mirrors (checkpoints and the circle's thoughts), dialogue, HUD</span></div>
+</div>
+<div class="flow"><b>How a frame flows:</b> Input System → Player (movement, abilities) → Physics → Combat (hits, health) →
+events → UI and story react. Enemies and bosses run their own AI against the same physics and combat systems.</div>
+
+<table style="margin-top:10px">
+  <tr><th>PROJECT SIZE</th><th></th></tr>
+  <tr><td class="k">Code</td><td>~20,000 lines of C# across 91 scripts</td></tr>
+  <tr><td class="k">Content</td><td>18 scenes: the opening, 14 Triangle World areas, the Base Warden arena and test scenes</td></tr>
+  <tr><td class="k">Custom tools</td><td>Our own Unity editor tools that generate the level layouts and enemy setups, so levels can be rebuilt and redesigned quickly</td></tr>
+</table>
+
+<h2>5. PLATFORM &amp; HARDWARE</h2>
+<div class="two">
+  <table>
+    <tr><th colspan="2">DEVELOPMENT PC</th></tr>
+    <tr><td class="k">Processor</td><td>Intel Core i5-11400H</td></tr>
+    <tr><td class="k">Memory</td><td>16 GB RAM</td></tr>
+    <tr><td class="k">Graphics</td><td>NVIDIA GeForce RTX 2050</td></tr>
+    <tr><td class="k">OS</td><td>Windows 11</td></tr>
+  </table>
+  <table>
+    <tr><th colspan="2">MINIMUM TO PLAY (ESTIMATED)</th></tr>
+    <tr><td class="k">Processor</td><td>Dual-core CPU</td></tr>
+    <tr><td class="k">Memory</td><td>4 GB RAM</td></tr>
+    <tr><td class="k">Graphics</td><td>Any DirectX 11 GPU</td></tr>
+    <tr><td class="k">OS / disk</td><td>Windows 10 or 11, ~1 GB</td></tr>
+  </table>
+</div>
+
+<div class="foot">Prepared by Innate Interactive (1st Year, CSA) for Project Evaluation I &nbsp;·&nbsp; 27 November 2026</div>
+</body>
+</html>

@@ -99,6 +99,12 @@ namespace ProjectCircle.Player
 
         private void Start()
         {
+            // Arriving from another scene: keep the Threads gathered so far.
+            if (GameProgress.CarriedThreads >= 0f)
+            {
+                Threads = Mathf.Min(GameProgress.CarriedThreads, maxThreads);
+                GameProgress.CarriedThreads = -1f;
+            }
             ThreadMeter.Instance.Bind(this);
             ThreadsChanged?.Invoke(Threads, maxThreads);
         }
@@ -117,6 +123,9 @@ namespace ProjectCircle.Player
             health.Hit -= HandleHurt;
             if (IsMending) Stop();
         }
+
+        /// <summary>Leaving the scene: remember the Threads for the next one (a dead circle starts over).</summary>
+        private void OnDestroy() => GameProgress.CarriedThreads = health != null && health.IsDead ? -1f : Threads;
 
         private void Update()
         {

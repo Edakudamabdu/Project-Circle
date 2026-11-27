@@ -77,8 +77,7 @@ namespace ProjectCircle.Systems
         private float shakeDuration;
         private float shakeStartTime = float.NegativeInfinity;
 
-        // Optional room limits (exit openings): the view stops there instead of showing past them.
-        private CameraBounds2D bounds;
+        // Room limits (exit openings) come from CameraBounds2D.GetLimits: the view stops there instead of showing past them.
 
         /// <summary>
         /// Shakes the camera. <paramref name="strength"/> is the maximum offset in world units; it fades out
@@ -193,7 +192,6 @@ namespace ProjectCircle.Systems
         {
             followPosition = transform.position;
             cam = GetComponent<Camera>();
-            bounds = FindAnyObjectByType<CameraBounds2D>();
             defaultOrthographicSize = cam != null ? cam.orthographicSize : 6f;
             zoomTarget = zoomSize = defaultOrthographicSize;
 
@@ -258,9 +256,8 @@ namespace ProjectCircle.Systems
         /// <summary>Clamps a camera centre x to the scene's <see cref="CameraBounds2D"/>, if it has one.</summary>
         private float ClampX(float x)
         {
-            if (bounds == null) return x;
             float halfWidth = cam != null && cam.orthographic ? cam.orthographicSize * cam.aspect : 0f;
-            return bounds.ClampCentreX(x, halfWidth);
+            return CameraBounds2D.ClampCentreX(x, halfWidth);
         }
 
         /// <summary>Clamps a camera centre y to any <see cref="CameraLimitZone"/> the target is inside.</summary>

@@ -140,6 +140,8 @@ namespace ProjectCircle.EditorTools
             r.Tablet("T3", 77, -1, "Inscription",
                 "Only one who holds the shape of the first may pass.");
 
+            // The discarded: broken, lowest-rank (scalene) triangles, each one different.
+            r.Kind = TriangleKind.Scalene;
             r.Enemy("TriangleChaser", 22, -1);
             r.Enemy("TriangleChaser", 32, -1);
             r.Enemy("Spire", 43.5f, -6); r.Enemy("Spire", 47f, -6); r.Enemy("Spire", 50.5f, -6);
@@ -147,6 +149,7 @@ namespace ProjectCircle.EditorTools
             r.Enemy("TriangleChaser", 68, -1);
             r.CapeString(PlayerAbility.Dash, 87, -1, "The Runner's String", "DASH: Shift / gamepad RT");
             r.Enemy("WedgeCharger", 112, -1);        // only after the dash: dash through it
+            r.Kind = TriangleKind.Standard;
 
             foreach (float x in new[] { 9f, 16f, 30f, 61f, 84f, 117f }) r.ShardPile(x, -1);
             r.BackdropTriangle(20, 6, 4f, 15, new Color(0.2f, 0.18f, 0.16f));
@@ -307,10 +310,14 @@ namespace ProjectCircle.EditorTools
             r.Save();
         }
 
-        private static void TwinIsosceles() => BossRoom("TwinIsosceles", "The Twin Isosceles",
+        private static void TwinIsosceles()
+        {
+            BossRoom("TwinIsosceles", "The Twin Isosceles",
             "Empty boss room (BOSS 2), entered from the hall doorway on the Terraces. The seal on the floor stands in for the fight.",
             "Seal.Twins", "Vertex Seal II", "FromTerraces", "IsoscelesTerraces", "ToTwins",
             new Color(0.12f, 0.08f, 0.08f), new Color(0.38f, 0.26f, 0.22f), new[] { "Seal.Warden" });
+            TwinArenaBuilder.Build(); // the fight itself (see TwinArenaBuilder)
+        }
 
         // ====================================================================== UPPER STRATUM
 
@@ -589,10 +596,36 @@ namespace ProjectCircle.EditorTools
                 if (so.FindProperty("doorId").stringValue != "EnemyDoor") continue;
                 so.FindProperty("targetScene").stringValue = "Graveyard";
                 so.FindProperty("targetDoorId").stringValue = "FromHall";
+                // No portal: the corridor past the Hall of Strings opens on the east, and the circle walks out.
+                so.FindProperty("arrivalOffset").vector2Value = new Vector2(-2.5f, 0.5f);
+                so.FindProperty("glow").objectReferenceValue = null;
                 so.ApplyModifiedPropertiesWithoutUndo();
-                door.gameObject.name = "Door To Graveyard";
-                var label = door.GetComponentInChildren<TMPro.TMP_Text>(true);
-                if (label != null) label.text = "Broken Vertex Graveyard";
+                door.gameObject.name = "Edge - EnemyDoor (to Graveyard)";
+                door.transform.position = new Vector3(99f, -22f, 0f);
+                var box = door.GetComponent<BoxCollider2D>();
+                box.size = new Vector2(1f, 6f);
+                box.offset = new Vector2(RegionBuilder.EdgeTriggerDepth, 3f);
+                foreach (Transform child in door.transform) child.gameObject.SetActive(false); // no portal art
+                RegionBuilder.SetCameraStop(door, exitIsOnRight: true);
+            }
+            // The east wall of the corridor opens (6 high) onto a short gap the camera never shows.
+            var storyLevel = GameObject.Find("Level").transform;
+            foreach (string n in new[] { "Exit Gap Roof", "Exit Backstop" })
+            {
+                var old = storyLevel.Find(n);
+                if (old != null) Object.DestroyImmediate(old.gameObject);
+            }
+            Transform eastWall = storyLevel.Find("Corridor_Wall_East"), caveFloor = storyLevel.Find("Cave_Floor");
+            SetBox(eastWall, 98f, 100f, -16f, -8f);
+            SetBox(caveFloor, 8f, 107f, -30f, -22f);
+            AddBlock(storyLevel, "Exit Gap Roof", 100f, 107f, -16f, -4f, eastWall);
+            AddBlock(storyLevel, "Exit Backstop", 107f, 109f, -30f, -4f, eastWall);
+            var storyComp = storyLevel.GetComponent<CompositeCollider2D>();
+            if (storyComp != null)
+            {
+                foreach (var bc in storyLevel.GetComponentsInChildren<BoxCollider2D>()) { bc.enabled = false; bc.enabled = true; }
+                Physics2D.SyncTransforms();
+                storyComp.GenerateGeometry();
             }
             var opening = Object.FindAnyObjectByType<Systems.Story.OpeningSequence>();
             if (opening != null)
@@ -641,6 +674,7 @@ namespace ProjectCircle.EditorTools
                 box.size = new Vector2(1f, 5f);
                 box.offset = new Vector2(-RegionBuilder.EdgeTriggerDepth, 2.5f);
                 foreach (Transform child in door.transform) child.gameObject.SetActive(false); // no portal art
+                RegionBuilder.SetCameraStop(door, exitIsOnRight: false);
             }
             var exit = (GameObject)PrefabUtility.InstantiatePrefab(RegionBuilder.Prefab("World/SceneEdge"), arena);
             exit.name = "Edge - ToTerraces (to IsoscelesTerraces)";
@@ -654,6 +688,7 @@ namespace ProjectCircle.EditorTools
             eso.FindProperty("targetDoorId").stringValue = "FromWarden";
             eso.FindProperty("arrivalOffset").vector2Value = new Vector2(-2.5f, 0.5f);
             eso.ApplyModifiedPropertiesWithoutUndo();
+            RegionBuilder.SetCameraStop(exit.GetComponent<SceneDoor>(), exitIsOnRight: true);
             // The arena's east wall below 5 is a gate: shut through the fight, sinks once the Warden is beaten.
             var gate = (GameObject)PrefabUtility.InstantiatePrefab(RegionBuilder.Prefab("World/WardenGate"), arena);
             gate.name = "WardenGate (corridor)";
@@ -681,16 +716,18 @@ namespace ProjectCircle.EditorTools
                     "West opening → Scalene Slums. East: a corridor outside the arena (gate opens after the fight) → Isosceles Terraces.";
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
-            // Camera stops at the outer faces of the walls above the two openings.
-            var regionGo = Object.FindAnyObjectByType<RegionInfo>().gameObject;
-            var limits = regionGo.GetComponent<CameraBounds2D>();
-            if (limits == null) limits = regionGo.AddComponent<CameraBounds2D>();
-            var lso = new SerializedObject(limits);
-            lso.FindProperty("limitLeft").boolValue = true;
-            lso.FindProperty("minX").floatValue = -20f;
-            lso.FindProperty("limitRight").boolValue = true;
-            lso.FindProperty("maxX").floatValue = 36f;
-            lso.ApplyModifiedPropertiesWithoutUndo();
+            // The Warden leaves the double jump behind as a cape string to collect.
+            var bossArena = Object.FindAnyObjectByType<BossArena>();
+            if (bossArena != null)
+            {
+                var bso = new SerializedObject(bossArena);
+                bso.FindProperty("rewardStringPrefab").objectReferenceValue = RegionBuilder.Prefab("World/CapeString").GetComponent<CapeStringPickup>();
+                bso.ApplyModifiedPropertiesWithoutUndo();
+            }
+
+            // (The two edge doors stop the camera at the walls' outer faces themselves.)
+            var oldLimits = Object.FindAnyObjectByType<CameraBounds2D>();
+            if (oldLimits != null) Object.DestroyImmediate(oldLimits);
 
             var comp = level.GetComponent<CompositeCollider2D>();
             if (comp != null)

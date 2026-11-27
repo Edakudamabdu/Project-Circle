@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using ProjectCircle.Player;
 using TMPro;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 
 namespace ProjectCircle.UI
@@ -76,6 +77,7 @@ namespace ProjectCircle.UI
         {
             if (titleText != null) titleText.text = title;
             selected = 0;
+            Sfx.Play(SoundId.DialogueOpen);
             navigationHeld = true; // ignore a direction already held when it opens
             openedTime = Time.unscaledTime;
             IsOpen = true;
@@ -120,6 +122,7 @@ namespace ProjectCircle.UI
                 navigationHeld = true;
                 int count = optionTexts.Length;
                 selected = (selected + (y > 0f ? -1 : 1) + count) % count;
+                Sfx.Play(SoundId.MenuMove);
                 RefreshSelection();
             }
 
@@ -134,6 +137,7 @@ namespace ProjectCircle.UI
         private void HandleConfirm()
         {
             if (!IsOpen || !Interactable || Time.unscaledTime < openedTime + 0.2f) return;
+            Sfx.Play(SoundId.MenuConfirm);
             OptionChosen?.Invoke(selected);
         }
 

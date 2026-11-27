@@ -1,5 +1,6 @@
 using ProjectCircle.Player;
 using ProjectCircle.Systems.Story;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 
 namespace ProjectCircle.Systems
@@ -33,6 +34,17 @@ namespace ProjectCircle.Systems
         private PlayerAbilities abilities;
         private bool collected;
 
+        /// <summary>Raised once when the circle collects this string.</summary>
+        public event System.Action Collected;
+
+        /// <summary>Sets a string up from code (e.g. one a boss drops). Call right after Instantiate.</summary>
+        public void Configure(PlayerAbility newAbility, string newName, string newHint)
+        {
+            ability = newAbility;
+            stringName = newName;
+            hint = newHint;
+        }
+
         private void Start()
         {
             var movement = FindAnyObjectByType<PlayerMovement>();
@@ -57,6 +69,7 @@ namespace ProjectCircle.Systems
             abilities.Grant(ability);
             Vector2 at = transform.position;
             Fx.LightColumn(at + Vector2.down * 1.2f, 7f, glowColor, 1.1f, 1.6f);
+            Sfx.Play(SoundId.StringPickup);
             Fx.Ring(at, glowColor, 2.4f, 0.45f, 0.12f);
             Fx.Shards(at, glowColor, 16, 5f, 0.14f);
             var cam = FindAnyObjectByType<CameraFollow2D>();
@@ -64,6 +77,7 @@ namespace ProjectCircle.Systems
             CinematicOverlay.Instance.ShowAreaName(stringName.ToUpperInvariant(), 2.5f);
             if (!string.IsNullOrEmpty(hint)) CinematicOverlay.Instance.ShowHint(hint, 4f);
             Hide();
+            Collected?.Invoke();
         }
 
         private void Hide()

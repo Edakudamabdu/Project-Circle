@@ -1,4 +1,5 @@
 using ProjectCircle.Player;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 
 namespace ProjectCircle.Enemies
@@ -73,6 +74,7 @@ namespace ProjectCircle.Enemies
         {
             var go = new GameObject("Ground Shockwave");
             go.transform.position = origin;
+            Sfx.Play(SoundId.Slam, origin); // waves come in pairs; the library's min interval plays it once
             var wave = go.AddComponent<GroundShockwave>();
             wave.settings = settings;
             wave.direction = dir >= 0 ? 1 : -1;

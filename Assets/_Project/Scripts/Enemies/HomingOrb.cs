@@ -1,5 +1,6 @@
 using System;
 using ProjectCircle.Player;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 
 namespace ProjectCircle.Enemies
@@ -118,6 +119,7 @@ namespace ProjectCircle.Enemies
         {
             var go = new GameObject("Homing Orb");
             go.transform.position = position;
+            Sfx.Play(SoundId.OrbCast, position); // rate-limited in the library, so volleys don't stack up
 
             var orb = go.AddComponent<HomingOrb>();
             orb.settings = settings;

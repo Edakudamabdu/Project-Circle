@@ -1,4 +1,5 @@
 using ProjectCircle.Combat;
+using ProjectCircle.Systems.Audio;
 using UnityEngine;
 
 namespace ProjectCircle.Enemies
@@ -205,6 +206,7 @@ namespace ProjectCircle.Enemies
             body.linearVelocity = new Vector2(0f, vy);
             SetPointGlow(0f, chargeColor);
             Systems.Fx.Dust(new Vector2(body.position.x + facing * box.size.x * 0.5f, box.bounds.min.y), 1.2f, 0.7f);
+            Sfx.Play(SoundId.Slam, body.position, 0.6f, 1.3f);
             var cam = FindAnyObjectByType<Systems.CameraFollow2D>();
             if (cam != null) cam.Shake(0.15f, 0.2f);
             homeX = body.position.x;

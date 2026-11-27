@@ -36,6 +36,9 @@ namespace ProjectCircle.Player
             attack = GetComponent<PlayerAttack>();
             parry = GetComponent<PlayerParry>();
             health = GetComponent<PlayerHealth>();
+
+            // The sounds live in their own component; make sure every scene's circle has it.
+            if (GetComponent<PlayerAudio>() == null) gameObject.AddComponent<PlayerAudio>();
         }
 
         private void Start() => cameraFollow = FindAnyObjectByType<CameraFollow2D>();
